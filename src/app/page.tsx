@@ -5,7 +5,8 @@ import { getDashboardData } from "@/lib/data";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const { configured, restaurants, visits, toEatItems } = await getDashboardData();
+  const { configured, restaurants, visits, toEatItems, profile } =
+    await getDashboardData();
 
   return (
     <main className="min-h-screen bg-white">
@@ -15,6 +16,7 @@ export default async function Home() {
           restaurants={restaurants}
           toEatItems={toEatItems}
           visits={visits}
+          profile={profile}
         />
       </div>
     </main>

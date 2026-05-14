@@ -59,21 +59,25 @@ async function verifyTables(supabase) {
 }
 
 async function verifyStorage(supabase) {
-  const { data, error } = await supabase.storage.getBucket("food-photos");
+  const buckets = ["food-photos", "avatars"];
 
-  if (error) {
-    throw new Error(
-      `Storage bucket check failed: ${error.message}. Run supabase/storage.sql in the Supabase SQL editor.`,
-    );
+  for (const bucket of buckets) {
+    const { data, error } = await supabase.storage.getBucket(bucket);
+
+    if (error) {
+      throw new Error(
+        `Storage bucket check failed for ${bucket}: ${error.message}. Run supabase/storage.sql in the Supabase SQL editor.`,
+      );
+    }
+
+    if (!data) {
+      throw new Error(
+        `Storage bucket check failed: ${bucket} was not found. Run supabase/storage.sql in the Supabase SQL editor.`,
+      );
+    }
+
+    console.log(`ok storage bucket ${bucket}`);
   }
-
-  if (!data) {
-    throw new Error(
-      "Storage bucket check failed: food-photos was not found. Run supabase/storage.sql in the Supabase SQL editor.",
-    );
-  }
-
-  console.log("ok storage bucket food-photos");
 }
 
 async function main() {

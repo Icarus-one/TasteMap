@@ -1,5 +1,15 @@
 import { createSupabaseAdminClient } from "@/lib/supabaseAdmin";
-import type { Photo, RestaurantWithRelations, VisitWithRelations } from "@/lib/types";
+import type {
+  Photo,
+  Profile,
+  RestaurantWithRelations,
+  VisitWithRelations,
+} from "@/lib/types";
+
+export type SharedRestaurantPayload = {
+  restaurant: RestaurantWithRelations;
+  sharer: Profile | null;
+};
 
 type PhotoStorageClient = {
   storage: {
@@ -50,11 +60,11 @@ export async function getSharedRestaurantByToken(token: string) {
 
   const { data: share } = await supabase
     .from("shared_restaurant_links")
-    .select("restaurant_id")
+    .select("restaurant_id, user_id")
     .eq("token", token)
     .maybeSingle();
 
-  if (!share?.restaurant_id) {
+  if (!share?.restaurant_id || !share.user_id) {
     return null;
   }
 
@@ -63,7 +73,17 @@ export async function getSharedRestaurantByToken(token: string) {
     .update({ last_used_at: new Date().toISOString() })
     .eq("token", token);
 
-  return getSharedRestaurantById(share.restaurant_id);
+  const [restaurant, profileResult] = await Promise.all([
+    getSharedRestaurantById(share.restaurant_id),
+    supabase.from("profiles").select("*").eq("id", share.user_id).maybeSingle(),
+  ]);
+
+  if (!restaurant) return null;
+
+  return {
+    restaurant,
+    sharer: (profileResult.data as Profile | null) ?? null,
+  } satisfies SharedRestaurantPayload;
 }
 
 async function hydrateRestaurantPhotos(

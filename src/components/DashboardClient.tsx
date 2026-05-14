@@ -9,6 +9,7 @@ import {
   ClipboardList,
   Clock3,
   MapPin,
+  MapPinned,
   MoreHorizontal,
   Search,
   Settings,
@@ -19,6 +20,7 @@ import {
 import { NewEntryMenu } from "@/components/layout/NewEntryMenu";
 import { LanguageMenu } from "@/components/layout/LanguageMenu";
 import { UserText } from "@/components/i18n/UserText";
+import { ProfileMenu } from "@/components/profile/ProfileMenu";
 import { compactAddress } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -27,6 +29,7 @@ import {
 } from "@/lib/scoring";
 import type {
   RestaurantWithRelations,
+  Profile,
   ToEatItem,
   VisitWithRelations,
 } from "@/lib/types";
@@ -35,12 +38,14 @@ type DashboardClientProps = {
   restaurants: RestaurantWithRelations[];
   toEatItems: ToEatItem[];
   visits: VisitWithRelations[];
+  profile?: Profile | null;
 };
 
 export function DashboardClient({
   restaurants,
   toEatItems,
   visits,
+  profile = null,
 }: DashboardClientProps) {
   const { t } = useI18n();
   const archivePreview = [...restaurants]
@@ -71,6 +76,7 @@ export function DashboardClient({
         <div className="mx-auto grid max-w-6xl gap-5">
           <div className="flex items-start justify-between gap-4">
             <div className="grid gap-2">
+              <ProfileMenu profile={profile} />
               <p className="text-sm font-bold uppercase tracking-wide text-stone-700">
                 {t("dashboard.brand")}
               </p>
@@ -80,6 +86,14 @@ export function DashboardClient({
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <LanguageMenu />
+              <Link
+                href="/map"
+                className="inline-flex size-11 items-center justify-center rounded-lg border border-white/80 bg-white/90 text-stone-800 shadow-sm transition hover:bg-white"
+                aria-label={t("header.map")}
+                title={t("header.map")}
+              >
+                <MapPinned aria-hidden="true" className="size-5" />
+              </Link>
               <Link
                 href="/settings"
                 className="inline-flex size-11 items-center justify-center rounded-lg border border-white/80 bg-white/90 text-stone-800 shadow-sm transition hover:bg-white"

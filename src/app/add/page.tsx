@@ -27,6 +27,7 @@ export default async function AddPage({ searchParams }: AddPageProps) {
         {!configured ? <ConfigNotice /> : null}
         <AddRecordClient
           configured={configured}
+          mapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? null}
           availableTags={availableTags}
           prefillToDoItem={prefillToDoItem}
         />

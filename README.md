@@ -94,6 +94,7 @@ That means the project optimizes for low-friction capture first, then structured
 - Supabase Storage
 - OpenAI API for dish and content analysis
 - Places API for nearby restaurant search
+- Maps JavaScript API for the private log map
 - `exifr` for EXIF parsing
 - `zod` for validation
 
@@ -175,6 +176,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.4-mini
 PLACES_API_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -183,6 +185,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `SUPABASE_SERVICE_ROLE_KEY` must stay server-side
 - `OPENAI_API_KEY` must stay server-side
 - `PLACES_API_KEY` should be treated as server-side for this app
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is browser-visible and must be restricted by HTTP referrer in Google Cloud
 - `NEXT_PUBLIC_APP_URL` must be updated for production
 
 ## Supabase setup
@@ -199,7 +202,7 @@ Quick version:
    1. `supabase/schema.sql`
    2. `supabase/policies.sql`
    3. `supabase/storage.sql`
-4. Make sure the private `food-photos` bucket exists
+4. Make sure the private `food-photos` bucket and public `avatars` bucket exist
 
 ## Storage modes
 

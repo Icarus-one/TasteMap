@@ -6,6 +6,7 @@ import type {
   RestaurantMatchCandidate,
 } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { AddressMapPicker } from "./AddressMapPicker";
 
 export type RestaurantDraft = {
   mode: "existing" | "provider" | "manual";
@@ -25,6 +26,7 @@ export type RestaurantDraft = {
 type NearbyRestaurantPickerProps = {
   candidates: RestaurantCandidate[];
   archiveMatches?: RestaurantMatchCandidate[];
+  mapsApiKey: string | null;
   selected: RestaurantDraft;
   onChange: (restaurant: RestaurantDraft) => void;
   onSelectArchiveMatch: (candidate: RestaurantMatchCandidate) => void;
@@ -33,6 +35,7 @@ type NearbyRestaurantPickerProps = {
 export function NearbyRestaurantPicker({
   candidates,
   archiveMatches = [],
+  mapsApiKey,
   selected,
   onChange,
   onSelectArchiveMatch,
@@ -241,6 +244,11 @@ export function NearbyRestaurantPicker({
               placeholder={t("restaurant.addressPlaceholder")}
             />
           </label>
+          <AddressMapPicker
+            apiKey={mapsApiKey}
+            selected={selected}
+            onChange={onChange}
+          />
         </div>
       </div>
     </section>

@@ -3,10 +3,34 @@ create extension if not exists "pgcrypto";
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
+  handle text,
   avatar_url text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table profiles add column if not exists handle text;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'profiles_handle_format'
+  ) then
+    alter table profiles add constraint profiles_handle_format
+      check (handle is null or handle ~ '^[a-z0-9._-]{1,20}$');
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'profiles_display_name_length'
+  ) then
+    alter table profiles add constraint profiles_display_name_length
+      check (display_name is null or char_length(display_name) <= 30);
+  end if;
+end $$;
+
+create unique index if not exists profiles_handle_unique_idx
+  on profiles (handle)
+  where handle is not null;
 
 create table if not exists restaurants (
   id uuid primary key default gen_random_uuid(),

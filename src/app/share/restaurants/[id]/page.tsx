@@ -10,6 +10,7 @@ import { AddSharedRestaurantToDoButton } from "@/components/share/AddSharedResta
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { compactAddress, formatDate } from "@/lib/format";
 import { getSessionContext } from "@/lib/data";
+import { profileInitial } from "@/lib/profileUtils";
 import { getSharedRestaurantByToken } from "@/lib/sharedRestaurants";
 import type { Photo, RestaurantWithRelations } from "@/lib/types";
 
@@ -23,13 +24,14 @@ export default async function SharedRestaurantPage({
   params,
 }: SharedRestaurantPageProps) {
   const { id: token } = await params;
-  const [restaurant, context] = await Promise.all([
+  const [shared, context] = await Promise.all([
     getSharedRestaurantByToken(token),
     getSessionContext(),
   ]);
 
-  if (!restaurant) notFound();
+  if (!shared) notFound();
 
+  const { restaurant, sharer } = shared;
   const sharePath = `/share/restaurants/${token}`;
   const visits = [...(restaurant.visits ?? [])].sort((a, b) =>
     String(b.created_at).localeCompare(String(a.created_at)),
@@ -64,6 +66,34 @@ export default async function SharedRestaurantPage({
               <p className="text-sm font-bold uppercase text-emerald-700">
                 <I18nText k="share.eyebrow" />
               </p>
+              {sharer ? (
+                <div className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 p-3">
+                  {sharer.avatar_url ? (
+                    <img
+                      src={sharer.avatar_url}
+                      alt=""
+                      className="size-11 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="grid size-11 place-items-center rounded-full bg-stone-950 text-sm font-bold text-white">
+                      {profileInitial(sharer)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase text-stone-500">
+                      <I18nText k="share.sharedBy" />
+                    </p>
+                    <p className="truncate text-sm font-bold text-stone-950">
+                      {sharer.display_name}
+                    </p>
+                    {sharer.handle ? (
+                      <p className="truncate text-xs font-semibold text-stone-500">
+                        @{sharer.handle}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
               <UserText
                 as="h1"
                 text={restaurant.name}

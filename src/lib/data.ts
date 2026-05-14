@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { demoRestaurants, demoToEatItems, demoVisits } from "@/lib/demoData";
+import { ensureProfileFromUser, isProfileComplete } from "@/lib/profile";
 import type {
   Photo,
+  Profile,
   RestaurantWithRelations,
   ToEatItem,
   VisitWithRelations,
@@ -28,7 +30,10 @@ type PhotoStorageClient = {
   };
 };
 
-export async function getSessionContext(options?: { protect?: boolean }) {
+export async function getSessionContext(options?: {
+  protect?: boolean;
+  skipProfileSetup?: boolean;
+}) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
@@ -36,6 +41,7 @@ export async function getSessionContext(options?: { protect?: boolean }) {
       configured: false,
       supabase: null,
       user: null,
+      profile: null,
     };
   }
 
@@ -47,10 +53,22 @@ export async function getSessionContext(options?: { protect?: boolean }) {
     redirect("/login");
   }
 
+  const profile = user ? await ensureProfileFromUser(supabase, user) : null;
+
+  if (
+    user &&
+    options?.protect &&
+    !options.skipProfileSetup &&
+    !isProfileComplete(profile)
+  ) {
+    redirect("/profile/setup");
+  }
+
   return {
     configured: true,
     supabase,
     user,
+    profile,
   };
 }
 
@@ -69,6 +87,7 @@ export async function getDashboardData() {
       restaurants: hasLocalData ? local.restaurants : demoRestaurants,
       visits: hasLocalData ? local.visits : demoVisits,
       toEatItems: hasLocalData ? local.toEatItems : demoToEatItems,
+      profile: null,
     };
   }
 
@@ -103,6 +122,7 @@ export async function getDashboardData() {
       visits.map((visit) => hydrateVisitPhotos(context.supabase, visit)),
     ),
     toEatItems,
+    profile: context.profile as Profile | null,
   };
 }
 

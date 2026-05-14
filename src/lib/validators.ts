@@ -153,3 +153,24 @@ export const translateTextSchema = z.object({
   source_language: z.enum(["en", "zh", "fr", "unknown"]).optional().default("unknown"),
   target_language: z.enum(["en", "zh", "fr"]),
 });
+
+export const profileHandleSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(20)
+  .regex(/^[A-Za-z0-9._-]+$/)
+  .transform((value) => value.toLowerCase());
+
+export const profileInputSchema = z.object({
+  display_name: z.string().trim().min(1).max(30),
+  handle: profileHandleSchema,
+  avatar_url: z
+    .string()
+    .trim()
+    .url()
+    .max(1000)
+    .or(z.literal(""))
+    .optional()
+    .transform((value) => value || null),
+});

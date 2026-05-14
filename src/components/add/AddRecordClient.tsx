@@ -33,6 +33,7 @@ import type {
 
 type AddRecordClientProps = {
   configured: boolean;
+  mapsApiKey: string | null;
   availableTags: string[];
   prefillToDoItem?: {
     id: string;
@@ -77,6 +78,7 @@ const stateLabelKeys: Record<AddRecordState, I18nKey> = {
 
 export function AddRecordClient({
   configured,
+  mapsApiKey,
   availableTags,
   prefillToDoItem = null,
 }: AddRecordClientProps) {
@@ -492,7 +494,9 @@ export function AddRecordClient({
             summary: summarizeLog(summary),
             detailed_review: emptyToNull(summary),
             tags,
-            location_source: primaryLocation?.source ?? "unknown",
+            location_source:
+              primaryLocation?.source ??
+              (hasManualRestaurantLocation(restaurant) ? "manual" : "unknown"),
             restaurant_match_source: matchSourceForRestaurant(restaurant.mode),
           },
           dishes: dishes
@@ -630,6 +634,7 @@ export function AddRecordClient({
         <NearbyRestaurantPicker
           candidates={candidates}
           archiveMatches={archiveMatches}
+          mapsApiKey={mapsApiKey}
           selected={restaurant}
           onChange={setRestaurant}
           onSelectArchiveMatch={(candidate) =>
@@ -817,6 +822,10 @@ function matchSourceForRestaurant(mode: RestaurantDraft["mode"]) {
   if (mode === "provider") return "places_api";
   if (mode === "existing") return "existing_restaurant";
   return "manual";
+}
+
+function hasManualRestaurantLocation(restaurant: RestaurantDraft) {
+  return isNumber(restaurant.latitude) && isNumber(restaurant.longitude);
 }
 
 function revisitFromStars(stars: number) {
