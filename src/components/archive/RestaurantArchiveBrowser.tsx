@@ -4,6 +4,7 @@ import { useState } from "react";
 import { RestaurantCard } from "@/components/cards/RestaurantCard";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { SearchBar } from "@/components/ui/SearchBar";
+import { getWeightedRestaurantScore } from "@/lib/scoring";
 import type { RestaurantWithRelations } from "@/lib/types";
 
 type RestaurantArchiveBrowserProps = {
@@ -61,10 +62,16 @@ export function RestaurantArchiveBrowser({
       const latestB = getLatestVisit(b);
 
       if (sort === "score_desc") {
-        return Number(latestB?.total_score ?? -1) - Number(latestA?.total_score ?? -1);
+        return (
+          Number(getWeightedRestaurantScore(b) ?? -1) -
+          Number(getWeightedRestaurantScore(a) ?? -1)
+        );
       }
       if (sort === "score_asc") {
-        return Number(latestA?.total_score ?? 99) - Number(latestB?.total_score ?? 99);
+        return (
+          Number(getWeightedRestaurantScore(a) ?? 99) -
+          Number(getWeightedRestaurantScore(b) ?? 99)
+        );
       }
       if (sort === "recommended") {
         return countRestaurantRecommendedVotes(b) - countRestaurantRecommendedVotes(a);

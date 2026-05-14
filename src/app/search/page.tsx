@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { ConfigNotice } from "@/components/layout/ConfigNotice";
+import { I18nText } from "@/components/i18n/I18nText";
 import { RestaurantArchiveBrowser } from "@/components/archive/RestaurantArchiveBrowser";
 import { getDashboardData } from "@/lib/data";
 
@@ -15,14 +16,13 @@ export default async function SearchPage() {
         {!configured ? <ConfigNotice /> : null}
         <section className="grid gap-2">
           <p className="text-sm font-semibold uppercase text-amber-700">
-            Archive search
+            <I18nText k="page.search.eyebrow" />
           </p>
           <h1 className="text-3xl font-bold text-stone-950 sm:text-4xl">
-            Search your restaurant cards
+            <I18nText k="page.search.title" />
           </h1>
           <p className="max-w-3xl text-sm leading-7 text-stone-600">
-            Browse the full archive with tag filters, dish keywords, cities, and
-            notes when you want more than the home preview.
+            <I18nText k="page.search.subtitle" />
           </p>
         </section>
         <RestaurantArchiveBrowser restaurants={restaurants} />

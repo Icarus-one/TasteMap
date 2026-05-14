@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/lib/i18n";
 
 export function SettingsClient() {
   const router = useRouter();
+  const { t } = useI18n();
   const [message, setMessage] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
 
@@ -16,7 +18,7 @@ export function SettingsClient() {
     setIsWorking(false);
 
     if (!response.ok) {
-      setMessage("Export failed.");
+      setMessage(t("settings.exportFailed"));
       return;
     }
 
@@ -27,13 +29,11 @@ export function SettingsClient() {
     link.download = `tastemap-export-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    setMessage("JSON export ready.");
+    setMessage(t("settings.exportReady"));
   }
 
   async function deleteAllData() {
-    const confirmed = window.confirm(
-      "Delete all restaurants, visits, dishes, and photos in this account?",
-    );
+    const confirmed = window.confirm(t("settings.deleteConfirm"));
     if (!confirmed) return;
 
     setIsWorking(true);
@@ -42,11 +42,11 @@ export function SettingsClient() {
     setIsWorking(false);
 
     if (!response.ok) {
-      setMessage("Delete failed.");
+      setMessage(t("settings.deleteFailed"));
       return;
     }
 
-    setMessage("All private records were deleted.");
+    setMessage(t("settings.deleteDone"));
     router.refresh();
   }
 
@@ -64,7 +64,7 @@ export function SettingsClient() {
         className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-stone-950 px-4 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
       >
         <Download aria-hidden="true" className="size-4" />
-        Export JSON
+        {t("settings.exportJson")}
       </button>
       <button
         type="button"
@@ -73,7 +73,7 @@ export function SettingsClient() {
         className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-800 transition hover:bg-rose-100 disabled:opacity-60"
       >
         <Trash2 aria-hidden="true" className="size-4" />
-        Delete all data
+        {t("settings.deleteAll")}
       </button>
     </div>
   );

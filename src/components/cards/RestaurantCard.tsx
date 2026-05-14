@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { Coins, MapPin, Sparkles } from "lucide-react";
 import { compactAddress, formatAveragePrice, formatDate } from "@/lib/format";
+import { getWeightedRestaurantScore } from "@/lib/scoring";
 import type { RestaurantWithRelations } from "@/lib/types";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
+import { UserText } from "@/components/i18n/UserText";
 
 type RestaurantCardProps = {
   restaurant: RestaurantWithRelations;
@@ -14,6 +16,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
   const latestVisit = [...(restaurant.visits ?? [])].sort((a, b) =>
     String(b.created_at).localeCompare(String(a.created_at)),
   )[0];
+  const weightedScore = getWeightedRestaurantScore(restaurant);
   const heroPhoto = restaurant.photos?.[0] ?? latestVisit?.photos?.[0];
   const recommended = (restaurant.dishes ?? [])
     .filter((dish) => dish.is_recommended)
@@ -46,8 +49,12 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
       <div className="grid gap-4 p-4">
         <div className="grid gap-1">
           <div className="flex items-start justify-between gap-3">
-            <h2 className="text-lg font-bold text-stone-950">{restaurant.name}</h2>
-            <ScoreBadge score={latestVisit?.total_score} label="Stars" />
+            <UserText
+              as="h2"
+              text={restaurant.name}
+              className="text-lg font-bold text-stone-950"
+            />
+            <ScoreBadge score={weightedScore} label="Stars" />
           </div>
           <p className="flex items-center gap-1 text-sm text-stone-500">
             <MapPin aria-hidden="true" className="size-4" />
@@ -84,9 +91,12 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           </div>
         ) : null}
         {latestVisit?.summary ? (
-          <p className="line-clamp-2 text-sm leading-6 text-stone-600">
-            {latestVisit.summary}
-          </p>
+          <UserText
+            as="p"
+            text={latestVisit.summary}
+            className="line-clamp-2 text-sm leading-6 text-stone-600"
+            translationClassName="line-clamp-2 text-xs leading-5 text-stone-500"
+          />
         ) : null}
         {recommended.length > 0 ? (
           <p className="text-sm text-stone-600">

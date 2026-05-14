@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { CalendarDays, Check, MapPin, X } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { I18nText } from "@/components/i18n/I18nText";
+import { UserText } from "@/components/i18n/UserText";
 import { AddSharedRestaurantToDoButton } from "@/components/share/AddSharedRestaurantToDoButton";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { compactAddress, formatDate } from "@/lib/format";
@@ -63,17 +64,23 @@ export default async function SharedRestaurantPage({
               <p className="text-sm font-bold uppercase text-emerald-700">
                 <I18nText k="share.eyebrow" />
               </p>
-              <h1 className="text-3xl font-bold text-stone-950 sm:text-4xl">
-                {restaurant.name}
-              </h1>
+              <UserText
+                as="h1"
+                text={restaurant.name}
+                className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                translationClassName="text-sm leading-6 text-stone-500"
+              />
               <p className="flex items-center gap-2 text-sm text-stone-500">
                 <MapPin aria-hidden="true" className="size-4" />
                 {compactAddress(restaurant.city, restaurant.address)}
               </p>
               {latestVisit?.summary ? (
-                <p className="max-w-3xl text-base leading-7 text-stone-700">
-                  {latestVisit.summary}
-                </p>
+                <UserText
+                  as="p"
+                  text={latestVisit.summary}
+                  className="max-w-3xl text-base leading-7 text-stone-700"
+                  translationClassName="max-w-3xl text-sm leading-6 text-stone-500"
+                />
               ) : null}
               {tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -164,9 +171,11 @@ export default async function SharedRestaurantPage({
               {formatDate(latestVisit.visit_date ?? latestVisit.taken_at)}
             </p>
             {latestVisit.detailed_review ? (
-              <p className="text-sm leading-6 text-stone-700">
-                {latestVisit.detailed_review}
-              </p>
+              <UserText
+                as="p"
+                text={latestVisit.detailed_review}
+                className="text-sm leading-6 text-stone-700"
+              />
             ) : null}
           </section>
         ) : null}
@@ -209,7 +218,11 @@ function DishPanel({
               key={item}
               className="rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1 text-sm font-semibold text-stone-700"
             >
-              {item}
+              <UserText
+                text={item}
+                translationAs="span"
+                translationClassName="block text-xs leading-5 text-stone-500"
+              />
             </span>
           ))}
         </div>

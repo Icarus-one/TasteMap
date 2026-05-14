@@ -9,6 +9,7 @@ import {
   Share2,
   Trash2,
 } from "lucide-react";
+import { UserText } from "@/components/i18n/UserText";
 import type { ToEatItem } from "@/lib/types";
 
 type ToEatRecordListProps = {
@@ -69,7 +70,11 @@ export function ToEatRecordList({
                       </span>
                     ) : null}
                   </div>
-                  <h3 className="font-bold text-stone-950">{item.title}</h3>
+                  <UserText
+                    as="h3"
+                    text={item.title}
+                    className="font-bold text-stone-950"
+                  />
                   <p className="text-sm leading-6 text-stone-600">
                     {summarizeItem(item)}
                   </p>
@@ -88,7 +93,11 @@ export function ToEatRecordList({
                 ) : null}
               </div>
               {item.note ? (
-                <p className="text-sm leading-6 text-stone-600">{item.note}</p>
+                <UserText
+                  as="p"
+                  text={item.note}
+                  className="text-sm leading-6 text-stone-600"
+                />
               ) : null}
               {mode === "manage" ? (
                 <div className="flex flex-wrap gap-2">

@@ -12,10 +12,12 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { PhotoGallery } from "@/components/detail/PhotoGallery";
 import { RestaurantCardActionsMenu } from "@/components/detail/RestaurantCardActionsMenu";
 import { ShareActionButton } from "@/components/share/ShareActionButton";
+import { UserText } from "@/components/i18n/UserText";
 import { VisitCard } from "@/components/cards/VisitCard";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { compactAddress, formatDate } from "@/lib/format";
 import { getRestaurantById } from "@/lib/data";
+import { getWeightedRestaurantScore } from "@/lib/scoring";
 import { buildRestaurantShareText } from "@/lib/share";
 import type { Photo, RestaurantWithRelations } from "@/lib/types";
 
@@ -44,11 +46,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
   const dishPhotoIndex = buildDishPhotoIndex(restaurant, galleryPhotos);
   const tags = collectRestaurantTags(restaurant);
   const shareText = buildRestaurantShareText(restaurant);
-  const averageScore = average(
-    visits
-      .map((visit) => visit.total_score)
-      .filter((score): score is number => typeof score === "number"),
-  );
+  const weightedScore = getWeightedRestaurantScore(restaurant);
 
   return (
     <main className="min-h-screen bg-stone-50">
@@ -82,18 +80,24 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 </span>
               </div>
               <div className="grid gap-2">
-                <h1 className="text-3xl font-bold text-stone-950 sm:text-4xl">
-                  {restaurant.name}
-                </h1>
+                <UserText
+                  as="h1"
+                  text={restaurant.name}
+                  className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                  translationClassName="text-sm leading-6 text-stone-500"
+                />
                 <p className="flex items-center gap-2 text-sm text-stone-500">
                   <MapPin aria-hidden="true" className="size-4" />
                   {compactAddress(restaurant.city, restaurant.address)}
                 </p>
               </div>
               {latestVisit?.summary ? (
-                <p className="max-w-3xl text-base leading-7 text-stone-700">
-                  {latestVisit.summary}
-                </p>
+                <UserText
+                  as="p"
+                  text={latestVisit.summary}
+                  className="max-w-3xl text-base leading-7 text-stone-700"
+                  translationClassName="max-w-3xl text-sm leading-6 text-stone-500"
+                />
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2 md:justify-end">
@@ -104,7 +108,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 label="Share"
               />
               <ScoreBadge
-                score={latestVisit?.total_score ?? averageScore}
+                score={weightedScore}
                 label="Stars"
               />
               <span className="inline-flex items-center rounded-lg border border-stone-200 bg-white px-2.5 py-1 text-sm font-semibold text-stone-700">
@@ -247,7 +251,12 @@ function DishList({
               ) : (
                 <div className="size-12 rounded-md bg-stone-100" />
               )}
-              <span>{item.name}</span>
+              <UserText
+                as="span"
+                text={item.name}
+                translationAs="span"
+                translationClassName="block text-xs leading-5 text-stone-500"
+              />
             </div>
           ))}
         </div>
@@ -337,11 +346,6 @@ function extractDetectedDishNames(value: unknown) {
 
 function normalizeDishName(value: string) {
   return value.trim().toLowerCase();
-}
-
-function average(values: number[]) {
-  if (values.length === 0) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 function collectRestaurantTags(restaurant: RestaurantWithRelations) {

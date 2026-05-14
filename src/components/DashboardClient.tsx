@@ -17,7 +17,14 @@ import {
   Tags,
 } from "lucide-react";
 import { NewEntryMenu } from "@/components/layout/NewEntryMenu";
+import { LanguageMenu } from "@/components/layout/LanguageMenu";
+import { UserText } from "@/components/i18n/UserText";
 import { compactAddress } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
+import {
+  getWeightedRestaurantScore,
+  getWeightedVisitScore,
+} from "@/lib/scoring";
 import type {
   RestaurantWithRelations,
   ToEatItem,
@@ -35,6 +42,7 @@ export function DashboardClient({
   toEatItems,
   visits,
 }: DashboardClientProps) {
+  const { t } = useI18n();
   const archivePreview = [...restaurants]
     .sort((left, right) =>
       String(getLatestVisit(right)?.created_at ?? right.created_at).localeCompare(
@@ -51,12 +59,7 @@ export function DashboardClient({
     );
   const compactToDoPreview = toDoPreview.slice(0, 3);
 
-  const scoredVisits = visits.filter((visit) => visit.total_score !== null);
-  const averageScore =
-    scoredVisits.length > 0
-      ? scoredVisits.reduce((sum, visit) => sum + Number(visit.total_score ?? 0), 0) /
-        scoredVisits.length
-      : 0;
+  const averageScore = getWeightedVisitScore(visits);
   const totalRecommendedDishes = visits.reduce(
     (sum, visit) => sum + countRecommendedVotes(visit),
     0,
@@ -69,18 +72,19 @@ export function DashboardClient({
           <div className="flex items-start justify-between gap-4">
             <div className="grid gap-2">
               <p className="text-sm font-bold uppercase tracking-wide text-stone-700">
-                TasteMap / 味迹
+                {t("dashboard.brand")}
               </p>
               <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-                Your private food archive, at a glance.
+                {t("dashboard.title")}
               </h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <LanguageMenu />
               <Link
                 href="/settings"
                 className="inline-flex size-11 items-center justify-center rounded-lg border border-white/80 bg-white/90 text-stone-800 shadow-sm transition hover:bg-white"
-                aria-label="Settings"
-                title="Settings"
+                aria-label={t("header.settings")}
+                title={t("header.settings")}
               >
                 <Settings aria-hidden="true" className="size-5" />
               </Link>
@@ -96,7 +100,7 @@ export function DashboardClient({
               aria-hidden="true"
               className="size-4 text-stone-400 transition group-hover:text-stone-500"
             />
-            <span>Search restaurants, dishes, cities, tags</span>
+            <span>{t("dashboard.search")}</span>
             <ArrowRight
               aria-hidden="true"
               className="ml-auto size-4 text-stone-400 transition group-hover:translate-x-0.5"
@@ -104,15 +108,15 @@ export function DashboardClient({
           </Link>
 
           <div className="grid gap-3 sm:grid-cols-4">
-            <StatCard label="Restaurants" value={restaurants.length} />
-            <StatCard label="Logs" value={visits.length} />
+            <StatCard label={t("dashboard.restaurants")} value={restaurants.length} />
+            <StatCard label={t("dashboard.logs")} value={visits.length} />
             <StatCard
-              label="Average stars"
-              value={Number.isFinite(averageScore) ? averageScore.toFixed(1) : "0"}
+              label={t("dashboard.averageStars")}
+              value={averageScore !== null ? averageScore.toFixed(1) : "0"}
               icon={<Star aria-hidden="true" className="size-5 fill-current" />}
             />
             <StatCard
-              label="Recommended dishes"
+              label={t("dashboard.recommendedDishes")}
               value={totalRecommendedDishes}
               icon={<Tags aria-hidden="true" className="size-5" />}
             />
@@ -123,9 +127,9 @@ export function DashboardClient({
       <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6">
         <section className="grid gap-4 lg:grid-cols-2">
           <CompactWedge
-            eyebrow="Archive preview"
-            title="Restaurant log archive"
-            description="Three recent cards, then one way into the full archive."
+            eyebrow={t("dashboard.archiveEyebrow")}
+            title={t("dashboard.archiveTitle")}
+            description={t("dashboard.archiveDescription")}
           >
             <div className="grid grid-cols-2 gap-3">
               {archivePreview.map((restaurant) => (
@@ -138,22 +142,23 @@ export function DashboardClient({
                 (_, index) => (
                   <EmptyPreviewTile
                     key={`archive-empty-${index}`}
-                    label="New logs will appear here."
+                    label={t("dashboard.emptyArchive")}
                   />
                 ),
               )}
               <MoreTile
                 href="/search"
-                label="More"
-                detail="Open archive search"
+                label={t("dashboard.more")}
+                detail={t("dashboard.openArchive")}
+                openLabel={t("common.open")}
               />
             </div>
           </CompactWedge>
 
           <CompactWedge
-            eyebrow="To-do preview"
-            title="To do list"
-            description="Keep your saved leads in a matching, lighter queue."
+            eyebrow={t("dashboard.todoEyebrow")}
+            title={t("dashboard.todoTitle")}
+            description={t("dashboard.todoDescription")}
           >
             <div className="grid grid-cols-2 gap-3">
               {compactToDoPreview.map((item) => (
@@ -163,11 +168,16 @@ export function DashboardClient({
                 (_, index) => (
                   <EmptyPreviewTile
                     key={`todo-empty-${index}`}
-                    label="Saved food leads land here."
+                    label={t("dashboard.emptyTodo")}
                   />
                 ),
               )}
-              <MoreTile href="/todo" label="More" detail="Open to do list" />
+              <MoreTile
+                href="/todo"
+                label={t("dashboard.more")}
+                detail={t("dashboard.openTodo")}
+                openLabel={t("common.open")}
+              />
             </div>
           </CompactWedge>
         </section>
@@ -212,6 +222,7 @@ function RestaurantPreviewCard({
   restaurant: RestaurantWithRelations;
 }) {
   const latestVisit = getLatestVisit(restaurant);
+  const weightedScore = getWeightedRestaurantScore(restaurant);
   const heroPhoto = restaurant.photos?.[0] ?? latestVisit?.photos?.[0];
   const tags = collectRestaurantTags(restaurant).slice(0, 2);
 
@@ -234,7 +245,12 @@ function RestaurantPreviewCard({
       <div className="absolute inset-x-0 bottom-0 grid gap-1.5 bg-gradient-to-t from-stone-950/90 via-stone-950/65 to-transparent p-3 text-white">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{restaurant.name}</p>
+            <UserText
+              as="p"
+              text={restaurant.name}
+              className="truncate text-sm font-semibold"
+              translationClassName="truncate text-[11px] leading-4 text-white/75"
+            />
             <p className="flex items-center gap-1 text-xs text-white/80">
               <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
               <span className="truncate">
@@ -242,12 +258,10 @@ function RestaurantPreviewCard({
               </span>
             </p>
           </div>
-          {latestVisit?.total_score !== null && latestVisit?.total_score !== undefined ? (
+          {weightedScore !== null ? (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-xs font-semibold">
+              <span>{weightedScore.toFixed(1)}</span>
               <Star aria-hidden="true" className="size-3.5 fill-current" />
-              {Number(latestVisit.total_score).toFixed(
-                Number(latestVisit.total_score) % 1 === 0 ? 0 : 1,
-              )}
             </span>
           ) : null}
         </div>
@@ -269,6 +283,7 @@ function RestaurantPreviewCard({
 }
 
 function ToDoPreviewCard({ item }: { item: ToEatItem }) {
+  const { t } = useI18n();
   const summary = [item.restaurant_name, item.city, item.cuisine_type]
     .filter(Boolean)
     .join(" · ");
@@ -296,16 +311,19 @@ function ToDoPreviewCard({ item }: { item: ToEatItem }) {
           </span>
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wide ${item.source_image_url ? "border border-white/20 bg-white/10 text-white/80" : "border border-stone-200 bg-white text-stone-500"}`}>
             <Clock3 aria-hidden="true" className="size-3.5" />
-            {item.status === "booked" ? "Booked" : "To do"}
+            {item.status === "booked" ? t("dashboard.booked") : t("dashboard.toDo")}
           </span>
         </div>
         <div className="grid gap-2">
           <div>
-            <p className={`line-clamp-2 text-sm font-semibold ${item.source_image_url ? "text-white" : "text-stone-950"}`}>
-              {item.title}
-            </p>
+            <UserText
+              as="p"
+              text={item.title}
+              className={`line-clamp-2 text-sm font-semibold ${item.source_image_url ? "text-white" : "text-stone-950"}`}
+              translationClassName={`line-clamp-2 text-xs leading-5 ${item.source_image_url ? "text-white/75" : "text-stone-500"}`}
+            />
             <p className={`mt-1 line-clamp-2 text-xs leading-5 ${item.source_image_url ? "text-white/75" : "text-stone-500"}`}>
-              {summary || "Saved food lead waiting for your next move."}
+              {summary || t("dashboard.savedFoodLead")}
             </p>
           </div>
           {tags.length > 0 ? (
@@ -338,10 +356,12 @@ function MoreTile({
   href,
   label,
   detail,
+  openLabel,
 }: {
   href: string;
   label: string;
   detail: string;
+  openLabel: string;
 }) {
   return (
     <Link
@@ -357,7 +377,7 @@ function MoreTile({
           <span className="text-xs leading-5 text-white/70">{detail}</span>
         </div>
         <span className="inline-flex items-center justify-center gap-1 text-xs font-semibold text-white/80">
-          Open
+          {openLabel}
           <ArrowRight
             aria-hidden="true"
             className="size-3.5 transition group-hover:translate-x-0.5"
@@ -372,17 +392,19 @@ function StatCard({
   label,
   value,
   icon = null,
+  valueClassName = "text-stone-950",
 }: {
   label: string;
   value: string | number;
   icon?: ReactNode;
+  valueClassName?: string;
 }) {
   return (
     <div className="rounded-lg border border-white/80 bg-white/90 p-4 shadow-sm">
       <p className="text-xs font-bold uppercase tracking-wide text-stone-500">
         {label}
       </p>
-      <p className="mt-2 flex items-center gap-2 text-3xl font-bold text-stone-950">
+      <p className={`mt-2 flex items-center gap-2 text-3xl font-bold ${valueClassName}`}>
         {icon}
         {value}
       </p>

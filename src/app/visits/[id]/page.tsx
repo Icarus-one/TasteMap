@@ -14,6 +14,7 @@ import {
 import { AppHeader } from "@/components/layout/AppHeader";
 import { PhotoGallery } from "@/components/detail/PhotoGallery";
 import { ShareActionButton } from "@/components/share/ShareActionButton";
+import { UserText } from "@/components/i18n/UserText";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { formatAveragePrice, formatDate } from "@/lib/format";
 import { getVisitById } from "@/lib/data";
@@ -56,13 +57,19 @@ export default async function VisitPage({ params }: VisitPageProps) {
                 <CalendarDays aria-hidden="true" className="size-4" />
                 {formatDate(visit.visit_date ?? visit.taken_at)}
               </p>
-              <h1 className="text-3xl font-bold text-stone-950 sm:text-4xl">
-                {visit.restaurants?.name ?? "Unknown restaurant"}
-              </h1>
+              <UserText
+                as="h1"
+                text={visit.restaurants?.name ?? "Unknown restaurant"}
+                className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                translationClassName="text-sm leading-6 text-stone-500"
+              />
               {visit.summary ? (
-                <p className="max-w-3xl text-base leading-7 text-stone-700">
-                  {visit.summary}
-                </p>
+                <UserText
+                  as="p"
+                  text={visit.summary}
+                  className="max-w-3xl text-base leading-7 text-stone-700"
+                  translationClassName="max-w-3xl text-sm leading-6 text-stone-500"
+                />
               ) : null}
               {tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -108,7 +115,11 @@ export default async function VisitPage({ params }: VisitPageProps) {
                     className="grid gap-2 rounded-lg border border-stone-200 p-3"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="font-bold text-stone-950">{dish.name}</h3>
+                      <UserText
+                        as="h3"
+                        text={dish.name}
+                        className="font-bold text-stone-950"
+                      />
                       <span className="rounded-lg bg-stone-100 px-2.5 py-1 text-sm font-semibold text-stone-700">
                         {dish.ai_confidence}
                       </span>
@@ -149,7 +160,11 @@ export default async function VisitPage({ params }: VisitPageProps) {
           <section className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
             <h2 className="text-xl font-bold text-stone-950">Log note</h2>
             <p className="whitespace-pre-wrap text-sm leading-7 text-stone-700">
-              {visit.detailed_review}
+              <UserText
+                text={visit.detailed_review}
+                translationAs="span"
+                translationClassName="mt-2 block text-xs leading-6 text-stone-500"
+              />
             </p>
           </section>
         ) : null}

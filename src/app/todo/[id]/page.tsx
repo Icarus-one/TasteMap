@@ -12,6 +12,7 @@ import {
   Tags,
 } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { UserText } from "@/components/i18n/UserText";
 import { ShareActionButton } from "@/components/share/ShareActionButton";
 import { compactAddress, formatDate } from "@/lib/format";
 import { getToEatItemById } from "@/lib/data";
@@ -80,9 +81,12 @@ export default async function TodoItemPage({ params }: TodoItemPageProps) {
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                   To-do item
                 </p>
-                <h1 className="text-3xl font-bold text-stone-950 sm:text-4xl">
-                  {item.title}
-                </h1>
+                <UserText
+                  as="h1"
+                  text={item.title}
+                  className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                  translationClassName="text-sm leading-6 text-stone-500"
+                />
                 {hasMeta ? (
                   <p className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
                     <MapPin aria-hidden="true" className="size-4" />
@@ -96,9 +100,12 @@ export default async function TodoItemPage({ params }: TodoItemPageProps) {
               </div>
 
               {item.note ? (
-                <p className="max-w-3xl whitespace-pre-wrap text-base leading-7 text-stone-700">
-                  {item.note}
-                </p>
+                <UserText
+                  as="p"
+                  text={item.note}
+                  className="max-w-3xl whitespace-pre-wrap text-base leading-7 text-stone-700"
+                  translationClassName="max-w-3xl whitespace-pre-wrap text-sm leading-6 text-stone-500"
+                />
               ) : (
                 <p className="text-sm leading-6 text-stone-500">
                   No note yet. This item is saved as a lightweight food lead.

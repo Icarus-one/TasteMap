@@ -5,6 +5,7 @@ import { CalendarDays, Coins, ThumbsDown, ThumbsUp, Utensils } from "lucide-reac
 import { formatAveragePrice, formatDate } from "@/lib/format";
 import type { VisitWithRelations } from "@/lib/types";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
+import { UserText } from "@/components/i18n/UserText";
 
 type VisitCardProps = {
   visit: VisitWithRelations;
@@ -48,9 +49,11 @@ export function VisitCard({ visit }: VisitCardProps) {
       <div className="grid gap-4 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="grid gap-1">
-            <h3 className="font-bold text-stone-950">
-              {visit.restaurants?.name ?? "Unknown restaurant"}
-            </h3>
+            <UserText
+              as="h3"
+              text={visit.restaurants?.name ?? "Unknown restaurant"}
+              className="font-bold text-stone-950"
+            />
             <p className="flex items-center gap-1 text-sm text-stone-500">
               <CalendarDays aria-hidden="true" className="size-4" />
               {formatDate(visit.visit_date ?? visit.taken_at)}
@@ -98,9 +101,12 @@ export function VisitCard({ visit }: VisitCardProps) {
           </p>
         ) : null}
         {visit.summary ? (
-          <p className="line-clamp-2 text-sm leading-6 text-stone-600">
-            {visit.summary}
-          </p>
+          <UserText
+            as="p"
+            text={visit.summary}
+            className="line-clamp-2 text-sm leading-6 text-stone-600"
+            translationClassName="line-clamp-2 text-xs leading-5 text-stone-500"
+          />
         ) : null}
       </div>
     </Link>

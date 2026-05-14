@@ -33,6 +33,10 @@ export function LanguageMenu() {
     };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   function selectLanguage(nextLanguage: LanguageCode) {
     setBrowserLanguage(nextLanguage);
     setOpen(false);

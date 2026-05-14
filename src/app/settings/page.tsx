@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { ConfigNotice } from "@/components/layout/ConfigNotice";
+import { I18nText } from "@/components/i18n/I18nText";
 import { SettingsClient } from "@/components/settings/SettingsClient";
 import { getSessionContext } from "@/lib/data";
 
@@ -16,17 +17,18 @@ export default async function SettingsPage() {
         <section className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
           <div className="grid gap-2">
             <p className="text-sm font-semibold uppercase text-emerald-700">
-              Settings
+              <I18nText k="settings.eyebrow" />
             </p>
-            <h1 className="text-3xl font-bold text-stone-950">Private archive</h1>
+            <h1 className="text-3xl font-bold text-stone-950">
+              <I18nText k="settings.title" />
+            </h1>
             <p className="text-sm leading-6 text-stone-600">
-              Signed in as {user?.email ?? "not configured"}.
+              <I18nText k="settings.signedInAs" />{" "}
+              {user?.email ?? <I18nText k="settings.notConfigured" />}.
             </p>
           </div>
           <div className="rounded-lg bg-stone-50 p-4 text-sm leading-6 text-stone-700">
-            All TasteMap records are stored under your Supabase user id. Row Level
-            Security policies restrict restaurants, visits, dishes, photos, and place
-            candidates to the owning account.
+            <I18nText k="settings.securityNote" />
           </div>
           <SettingsClient />
         </section>

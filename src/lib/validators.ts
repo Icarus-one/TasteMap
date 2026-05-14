@@ -147,3 +147,9 @@ export const updateToEatItemSchema = createToEatItemSchema.partial().extend({
 export const analyzeToEatLinkSchema = z.object({
   source_input: z.string().min(3).max(4000),
 });
+
+export const translateTextSchema = z.object({
+  text: z.string().min(1).max(700),
+  source_language: z.enum(["en", "zh", "fr", "unknown"]).optional().default("unknown"),
+  target_language: z.enum(["en", "zh", "fr"]),
+});
