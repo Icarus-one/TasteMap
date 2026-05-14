@@ -1,4 +1,8 @@
 import { nearbyRestaurantsInputSchema } from "@/lib/validators";
+import {
+  checkRateLimit,
+  requireSecureRouteSession,
+} from "@/server/security";
 
 type GooglePlace = {
   id?: string;
@@ -11,6 +15,18 @@ type GooglePlace = {
 };
 
 export async function POST(request: Request) {
+  const session = await requireSecureRouteSession(request);
+  if (!session.ok) {
+    return session.response;
+  }
+
+  const rateLimitError = checkRateLimit({
+    key: `nearby-restaurants:${session.user.id}`,
+    limit: 60,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (rateLimitError) return rateLimitError;
+
   const json = await request.json().catch(() => null);
   const parsed = nearbyRestaurantsInputSchema.safeParse(json);
 

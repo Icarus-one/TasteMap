@@ -1,5 +1,9 @@
 import { getOpenAIModel } from "@/lib/env";
 import { analyzeToEatLinkSchema } from "@/lib/validators";
+import {
+  checkRateLimit,
+  requireSecureRouteSession,
+} from "@/server/security";
 
 const linkAnalysisSchema = {
   type: "object",
@@ -46,6 +50,18 @@ const linkAnalysisSchema = {
 } as const;
 
 export async function POST(request: Request) {
+  const session = await requireSecureRouteSession(request);
+  if (!session.ok) {
+    return session.response;
+  }
+
+  const rateLimitError = checkRateLimit({
+    key: `analyze-to-eat-link:${session.user.id}`,
+    limit: 20,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (rateLimitError) return rateLimitError;
+
   const json = await request.json().catch(() => null);
   const parsed = analyzeToEatLinkSchema.safeParse(json);
 
@@ -173,6 +189,8 @@ export async function POST(request: Request) {
 
 async function getPageData(sourceUrl: string) {
   try {
+    if (!isAllowedFetchUrl(sourceUrl)) return null;
+
     const response = await fetch(sourceUrl, {
       headers: {
         "User-Agent":
@@ -206,6 +224,36 @@ async function getPageData(sourceUrl: string) {
     };
   } catch {
     return null;
+  }
+}
+
+function isAllowedFetchUrl(sourceUrl: string) {
+  try {
+    const url = new URL(sourceUrl);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+
+    const hostname = url.hostname.toLowerCase();
+    if (
+      hostname === "localhost" ||
+      hostname === "0.0.0.0" ||
+      hostname.endsWith(".local")
+    ) {
+      return false;
+    }
+
+    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname)) {
+      const parts = hostname.split(".").map(Number);
+      if (parts.some((part) => part < 0 || part > 255)) return false;
+      if (parts[0] === 10) return false;
+      if (parts[0] === 127) return false;
+      if (parts[0] === 169 && parts[1] === 254) return false;
+      if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return false;
+      if (parts[0] === 192 && parts[1] === 168) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
   }
 }
 

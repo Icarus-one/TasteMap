@@ -1,36 +1,304 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TasteMap / 味迹
 
-## Getting Started
+A web-first private food archive that turns meal photos and saved recommendations into structured restaurant memory.
 
-First, run the development server:
+TasteMap is built for one core habit:
+
+`save a meal -> remember the restaurant -> remember the dishes -> decide faster next time`
+
+Instead of acting like a public review site, it works more like a private food database:
+
+- post a meal log from photos
+- keep a private to-do queue from links or manual saves
+- turn a to-do item into a real meal log later
+- search by tags, dishes, and restaurant memory
+
+## What the app does
+
+### 1. Post log
+
+Create a meal log by uploading photos or manually entering a restaurant.
+
+The current flow supports:
+
+- one photo or multiple photos
+- no photo at all
+- optional EXIF time and GPS extraction
+- optional nearby restaurant lookup
+- AI dish suggestions from food photos
+- dish-level voting:
+  - recommended
+  - neutral
+  - skip next time
+- 0 to 5 star rating with 0.5 steps
+- optional average spend
+- optional tags
+- optional written note
+
+Saved logs build out private restaurant cards over time.
+
+### 2. To-do items
+
+Save future food ideas in two ways:
+
+- `Copy link`: paste a Xiaohongshu / Douyin / web link and let the app extract restaurant clues, cover image, and dish ideas
+- `Manual`: write a lightweight item directly
+
+Each to-do item can later be converted into a real meal log with prefilled restaurant context.
+
+### 3. Restaurant archive
+
+Every saved log contributes to a restaurant card with:
+
+- restaurant name and location
+- stars
+- tags
+- recommended dishes
+- skipped dishes
+- visit history
+- shareable summary
+
+### 4. Sharing
+
+The app currently supports lightweight sharing from detail pages:
+
+- restaurant detail
+- visit detail
+- to-do item detail
+
+On supported devices it uses the native share sheet. Otherwise it falls back to copying a formatted share summary.
+
+## Product direction
+
+TasteMap is intentionally **not**:
+
+- a public review community
+- a food feed
+- a merchant platform
+- a social graph
+
+The current product direction is:
+
+> a private food archive and recommendation memory system
+
+That means the project optimizes for low-friction capture first, then structured recall later.
+
+## Tech stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Supabase Auth
+- Supabase Postgres
+- Supabase Storage
+- OpenAI API for dish and content analysis
+- Places API for nearby restaurant search
+- `exifr` for EXIF parsing
+- `zod` for validation
+
+## Project structure
+
+```text
+src/
+  app/
+    add/
+    api/
+    auth/
+    login/
+    restaurants/[id]/
+    search/
+    settings/
+    signup/
+    todo/
+    visits/[id]/
+  components/
+    add/
+    archive/
+    auth/
+    cards/
+    detail/
+    layout/
+    settings/
+    share/
+    to-eat/
+    ui/
+  lib/
+  server/
+
+supabase/
+  schema.sql
+  policies.sql
+  storage.sql
+```
+
+## Local development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Lint:
 
-## Learn More
+```bash
+npm run lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+Production build check:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment variables
 
-## Deploy on Vercel
+Copy `.env.example` to `.env.local` and fill in the values:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5.4-mini
+PLACES_API_KEY=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Notes
+
+- `SUPABASE_SERVICE_ROLE_KEY` must stay server-side
+- `OPENAI_API_KEY` must stay server-side
+- `PLACES_API_KEY` should be treated as server-side for this app
+- `NEXT_PUBLIC_APP_URL` must be updated for production
+
+## Supabase setup
+
+The Supabase persistence setup lives in:
+
+- `supabase/README.md`
+
+Quick version:
+
+1. Create a Supabase project
+2. Fill `.env.local`
+3. Run SQL in this order:
+   1. `supabase/schema.sql`
+   2. `supabase/policies.sql`
+   3. `supabase/storage.sql`
+4. Make sure the private `food-photos` bucket exists
+
+## Storage modes
+
+The app supports two modes:
+
+### 1. Supabase mode
+
+Used when environment variables are configured.
+
+This enables:
+
+- real auth
+- cloud persistence
+- private image upload
+- RLS-protected user data
+
+### 2. Local archive mode
+
+Used as a fallback when Supabase is not configured.
+
+In this mode:
+
+- data is stored locally on the machine
+- the app remains usable for prototyping
+- cloud sync and auth are not active
+
+Local archive data is stored under:
+
+```text
+.tastemap/local-db.json
+```
+
+This folder is ignored by git.
+
+## Deployment
+
+Recommended deployment:
+
+- app: Vercel
+- database/auth/storage: Supabase
+
+### Deploy checklist
+
+1. Push the repo to GitHub
+2. Create a Supabase project
+3. Run the SQL files in `supabase/`
+4. Add environment variables in Vercel
+5. Set:
+   - Supabase Site URL
+   - Supabase Auth Redirect URL
+6. Deploy from Vercel
+
+For auth callback support, make sure Supabase includes:
+
+```text
+https://your-domain.com/auth/callback
+```
+
+## Current status
+
+This repo is an active MVP, not a finished product.
+
+The main working areas are:
+
+- photo-first meal logging
+- to-do capture from links or manual input
+- restaurant detail pages
+- visit detail pages
+- to-do detail pages
+- lightweight sharing
+- tag-based archive browsing
+
+Some flows are intentionally lightweight or heuristic-based:
+
+- nearby restaurant matching
+- link analysis from social content
+- AI dish extraction
+- restaurant identity matching
+
+They are designed to be editable by the user rather than fully automatic.
+
+## Editing guide
+
+If you are changing business logic later, the safest places to start are:
+
+- validation:
+  - `src/lib/validators.ts`
+- add-log workflow:
+  - `src/components/add/AddRecordClient.tsx`
+- to-do capture workflow:
+  - `src/components/to-eat/ToEatListClient.tsx`
+- Supabase persistence:
+  - `src/server/services/visitRecords.ts`
+  - `src/server/services/toEatItems.ts`
+- local fallback persistence:
+  - `src/server/localStore.ts`
+- SQL schema:
+  - `supabase/schema.sql`
+
+## License
+
+No license has been added yet. Treat this repository as private unless you explicitly decide otherwise.

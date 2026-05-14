@@ -36,6 +36,19 @@ Apply these files in the Supabase SQL editor:
 2. `policies.sql`
 3. `storage.sql`
 
+Re-run `schema.sql` and `policies.sql` after app updates too. They are written
+to be repeatable and may add new tables or policies, such as share-link tokens.
+
+Run each file as a whole file, not a partial column snippet. If the SQL editor
+shows `taken_at timestamptz,;`, the editor received a partial statement with a
+semicolon after a comma; paste the whole `schema.sql` file again.
+
+After the SQL files complete, verify from the repo root:
+
+```bash
+npm run verify:supabase
+```
+
 ## 4. Storage bucket shape
 
 The `food-photos` bucket is private.

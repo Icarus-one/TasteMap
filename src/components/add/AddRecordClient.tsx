@@ -19,6 +19,7 @@ import {
 import { fileToDataUrl, safeFileName } from "@/lib/file";
 import { readPhotoMetadata } from "@/lib/exif";
 import { requestDeviceLocation } from "@/lib/location";
+import { useI18n, type I18nKey } from "@/lib/i18n";
 import type {
   AddRecordState,
   Confidence,
@@ -60,18 +61,18 @@ type AnalyzePhotoResponse = {
   error?: string;
 };
 
-const stateLabels: Record<AddRecordState, string> = {
-  idle: "Upload",
-  reading_metadata: "Reading photo data",
-  uploading_photo: "Uploading",
-  analyzing_photo: "AI analysis",
-  finding_restaurants: "Finding places",
-  confirming_restaurant: "Restaurant",
-  confirming_dishes: "Dishes",
-  quick_review: "Review",
-  saving: "Saving",
-  success: "Saved",
-  error: "Needs attention",
+const stateLabelKeys: Record<AddRecordState, I18nKey> = {
+  idle: "add.state.idle",
+  reading_metadata: "add.state.reading_metadata",
+  uploading_photo: "add.state.uploading_photo",
+  analyzing_photo: "add.state.analyzing_photo",
+  finding_restaurants: "add.state.finding_restaurants",
+  confirming_restaurant: "add.state.confirming_restaurant",
+  confirming_dishes: "add.state.confirming_dishes",
+  quick_review: "add.state.quick_review",
+  saving: "add.state.saving",
+  success: "add.state.success",
+  error: "add.state.error",
 };
 
 export function AddRecordClient({
@@ -80,9 +81,10 @@ export function AddRecordClient({
   prefillToDoItem = null,
 }: AddRecordClientProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [state, setState] = useState<AddRecordState>("idle");
   const [statusText, setStatusText] = useState(
-    "Add photos if you have them, or type the restaurant and save a quick private log.",
+    t("add.status.initial"),
   );
   const [error, setError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
@@ -428,115 +430,120 @@ export function AddRecordClient({
     if (!canSave) return;
     setState("saving");
     setError(null);
-    setStatusText("Saving this restaurant log.");
+    setStatusText(t("add.status.saving"));
 
-    const photoPayload = (
-      await Promise.all(
-        photos.map(async (photo) => {
-          if (canUploadToSupabase && !photo.storagePath) {
-            return null;
-          }
+    try {
+      const photoPayload = (
+        await Promise.all(
+          photos.map(async (photo) => {
+            if (canUploadToSupabase && !photo.storagePath) {
+              return null;
+            }
 
-          if (!canUploadToSupabase && !photo.file) {
-            return null;
-          }
+            if (!canUploadToSupabase && !photo.file) {
+              return null;
+            }
 
-          const localPublicUrl =
-            !canUploadToSupabase && photo.file
-              ? await fileToDataUrl(photo.file)
-              : null;
+            const localPublicUrl =
+              !canUploadToSupabase && photo.file
+                ? await fileToDataUrl(photo.file)
+                : null;
 
-          return {
-            storage_path: photo.storagePath ?? `local/${photo.id}`,
-            public_url: photo.publicUrl ?? localPublicUrl,
-            photo_type: photo.aiAnalysis?.photoType ?? "unknown",
-            ai_analysis_json: photo.aiAnalysis ?? null,
-            taken_at: photo.takenAt ?? null,
-            exif_exists: photo.exifExists,
-            exif_latitude: photo.exifLatitude ?? null,
-            exif_longitude: photo.exifLongitude ?? null,
-            location_source: photo.locationSource,
-            ai_confidence: photo.aiAnalysis?.confidence ?? "unknown",
-          };
-        }),
-      )
-    ).filter((photo) => photo !== null);
+            return {
+              storage_path: photo.storagePath ?? `local/${photo.id}`,
+              public_url: photo.publicUrl ?? localPublicUrl,
+              photo_type: photo.aiAnalysis?.photoType ?? "unknown",
+              ai_analysis_json: photo.aiAnalysis ?? null,
+              taken_at: photo.takenAt ?? null,
+              exif_exists: photo.exifExists,
+              exif_latitude: photo.exifLatitude ?? null,
+              exif_longitude: photo.exifLongitude ?? null,
+              location_source: photo.locationSource,
+              ai_confidence: photo.aiAnalysis?.confidence ?? "unknown",
+            };
+          }),
+        )
+      ).filter((photo) => photo !== null);
 
-    const response = await fetch("/api/create-visit-from-photo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        restaurant: {
-          mode: restaurant.mode,
-          restaurant_id: restaurant.restaurant_id ?? null,
-          provider_place_id: restaurant.provider_place_id ?? null,
-          provider_name: restaurant.provider_name ?? null,
-          input_name: emptyToNull(restaurant.input_name) ?? restaurant.name.trim(),
-          name: restaurant.name.trim(),
-          address: emptyToNull(restaurant.address),
-          city: emptyToNull(restaurant.city),
-          country: emptyToNull(restaurant.country),
-          latitude: restaurant.latitude ?? primaryLocation?.latitude ?? null,
-          longitude: restaurant.longitude ?? primaryLocation?.longitude ?? null,
-          cuisine_type: emptyToNull(restaurant.cuisine_type),
-        },
-        visit: {
-          visit_date: toDateOnly(firstTakenAt ?? new Date().toISOString()),
-          taken_at: firstTakenAt,
-          average_price: parseOptionalNumber(averagePrice),
-          total_score: stars,
-          will_revisit: revisitFromStars(stars),
-          summary: summarizeLog(summary),
-          detailed_review: emptyToNull(summary),
-          tags,
-          location_source: primaryLocation?.source ?? "unknown",
-          restaurant_match_source: matchSourceForRestaurant(restaurant.mode),
-        },
-        dishes: dishes
-          .filter((dish) => dish.name.trim())
-          .map((dish) => ({
-            name: dish.name.trim(),
-            name_ai_guess: emptyToNull(dish.nameGuess),
-            cuisine_guess: emptyToNull(dish.cuisineGuess),
-            category: emptyToNull(dish.category),
-            visible_ingredients: dish.visibleIngredients ?? [],
-            ai_confidence: dish.confidence,
-            user_confirmed: true,
-            is_recommended: dish.isRecommended,
-            is_bad: dish.isBad,
-          })),
-        photos: photoPayload,
-      }),
-    });
-
-    const payload = (await response.json()) as {
-      visit_id?: string;
-      restaurant_id?: string;
-      error?: string;
-    };
-
-    if (!response.ok || !payload.visit_id) {
-      setState("error");
-      setError(payload.error ?? "Could not save this visit.");
-      return;
-    }
-
-    if (prefillToDoItem) {
-      await fetch("/api/to-eat-items", {
-        method: "PATCH",
+      const response = await fetch("/api/create-visit-from-photo", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: prefillToDoItem.id,
-          status: "visited",
-          linked_visit_id: payload.visit_id,
-          linked_restaurant_id: payload.restaurant_id ?? null,
+          restaurant: {
+            mode: restaurant.mode,
+            restaurant_id: restaurant.restaurant_id ?? null,
+            provider_place_id: restaurant.provider_place_id ?? null,
+            provider_name: restaurant.provider_name ?? null,
+            input_name: emptyToNull(restaurant.input_name) ?? restaurant.name.trim(),
+            name: restaurant.name.trim(),
+            address: emptyToNull(restaurant.address),
+            city: emptyToNull(restaurant.city),
+            country: emptyToNull(restaurant.country),
+            latitude: restaurant.latitude ?? primaryLocation?.latitude ?? null,
+            longitude: restaurant.longitude ?? primaryLocation?.longitude ?? null,
+            cuisine_type: emptyToNull(restaurant.cuisine_type),
+          },
+          visit: {
+            visit_date: toDateOnly(firstTakenAt ?? new Date().toISOString()),
+            taken_at: firstTakenAt,
+            average_price: parseOptionalNumber(averagePrice),
+            total_score: stars,
+            will_revisit: revisitFromStars(stars),
+            summary: summarizeLog(summary),
+            detailed_review: emptyToNull(summary),
+            tags,
+            location_source: primaryLocation?.source ?? "unknown",
+            restaurant_match_source: matchSourceForRestaurant(restaurant.mode),
+          },
+          dishes: dishes
+            .filter((dish) => dish.name.trim())
+            .map((dish) => ({
+              name: dish.name.trim(),
+              name_ai_guess: emptyToNull(dish.nameGuess),
+              cuisine_guess: emptyToNull(dish.cuisineGuess),
+              category: emptyToNull(dish.category),
+              visible_ingredients: dish.visibleIngredients ?? [],
+              ai_confidence: dish.confidence,
+              user_confirmed: true,
+              is_recommended: dish.isRecommended,
+              is_bad: dish.isBad,
+            })),
+          photos: photoPayload,
         }),
-      }).catch(() => null);
-    }
+      });
 
-    setState("success");
-    router.push(`/visits/${payload.visit_id}`);
-    router.refresh();
+      const payload = (await readJsonResponse(response)) as {
+        visit_id?: string;
+        restaurant_id?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.visit_id) {
+        setState("error");
+        setError(payload.error ?? "Could not save this visit.");
+        return;
+      }
+
+      if (prefillToDoItem) {
+        await fetch("/api/to-eat-items", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: prefillToDoItem.id,
+            status: "visited",
+            linked_visit_id: payload.visit_id,
+            linked_restaurant_id: payload.restaurant_id ?? null,
+          }),
+        }).catch(() => null);
+      }
+
+      setState("success");
+      router.push(`/visits/${payload.visit_id}`);
+      router.refresh();
+    } catch (caught) {
+      setState("error");
+      setError(caught instanceof Error ? caught.message : "Could not save this visit.");
+    }
   }
 
   function removePhoto(id: string) {
@@ -552,14 +559,34 @@ export function AddRecordClient({
 
   return (
     <div className="grid gap-6">
+      {error ? (
+        <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center bg-black/10 px-4">
+          <div
+            role="alert"
+            className="pointer-events-auto grid w-full max-w-xl gap-3 rounded-lg border border-rose-200 bg-rose-50 p-5 text-rose-950 shadow-xl"
+          >
+            <p className="text-sm font-bold uppercase text-rose-800">
+              {t("add.saveFailed")}
+            </p>
+            <p className="text-sm leading-6">{error}</p>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="justify-self-end rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-900 transition hover:bg-rose-100"
+            >
+              {t("add.dismiss")}
+            </button>
+          </div>
+        </div>
+      ) : null}
       <section className="grid gap-4 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase text-emerald-700">
-              Photo-first record
+              {t("add.hero.eyebrow")}
             </p>
             <h1 className="text-2xl font-bold text-stone-950 sm:text-3xl">
-              Turn a meal photo into a private memory.
+              {t("add.hero.title")}
             </h1>
           </div>
           <span className="inline-flex items-center gap-2 rounded-lg bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-700">
@@ -568,26 +595,18 @@ export function AddRecordClient({
             ) : (
               <CheckCircle2 aria-hidden="true" className="size-4" />
             )}
-            {stateLabels[state]}
+            {t(stateLabelKeys[state])}
           </span>
         </div>
         <p className="text-sm leading-6 text-stone-600">{statusText}</p>
         {!canUploadToSupabase ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            Local archive mode: you can save on this device right now, even without
-            Supabase. Add `.env.local` later if you want cloud auth and synced
-            storage.
+            {t("add.localMode")}
           </p>
         ) : null}
         {prefillToDoItem ? (
           <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-            This log started from a saved to-do item. We prefilled the restaurant
-            context, tags, and note so you can finish it faster.
-          </p>
-        ) : null}
-        {error ? (
-          <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900">
-            {error}
+            {t("add.prefill")}
           </p>
         ) : null}
       </section>
@@ -597,17 +616,15 @@ export function AddRecordClient({
 
       <div className="grid gap-6 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="grid gap-2">
-          <p className="text-sm font-semibold uppercase text-emerald-700">
-            Unified editor
-          </p>
-          <h2 className="text-2xl font-bold text-stone-950">
-            One pass to save this restaurant log
-          </h2>
-          <p className="text-sm leading-6 text-stone-600">
-            Photos are optional. If you add more than one, we treat the first as
-            the restaurant shot and use the rest to detect dishes. You can also save
-            with just a restaurant name, stars, and a short note.
-          </p>
+            <p className="text-sm font-semibold uppercase text-emerald-700">
+              {t("add.editor.eyebrow")}
+            </p>
+            <h2 className="text-2xl font-bold text-stone-950">
+              {t("add.editor.title")}
+            </h2>
+            <p className="text-sm leading-6 text-stone-600">
+              {t("add.editor.subtitle")}
+            </p>
         </div>
 
         <NearbyRestaurantPicker
@@ -655,8 +672,8 @@ export function AddRecordClient({
             className="inline-flex h-12 items-center gap-2 rounded-lg bg-emerald-700 px-5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
             title={
               canUploadToSupabase
-                ? "Save private record"
-                : "Save into the local archive on this device"
+                ? t("add.savePrivate")
+                : t("add.saveLocal")
             }
           >
             {isSaving ? (
@@ -664,12 +681,25 @@ export function AddRecordClient({
             ) : (
               <Save aria-hidden="true" className="size-4" />
             )}
-            {canUploadToSupabase ? "Save private record" : "Save into local archive"}
+            {canUploadToSupabase ? t("add.savePrivate") : t("add.saveLocal")}
           </button>
         </div>
       </div>
     </div>
   );
+}
+
+async function readJsonResponse(response: Response) {
+  const text = await response.text();
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      error: text.slice(0, 240) || `Request failed with ${response.status}.`,
+    };
+  }
 }
 
 function normalizeAnalysis(

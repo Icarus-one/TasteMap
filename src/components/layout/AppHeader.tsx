@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Settings } from "lucide-react";
+import { I18nText } from "@/components/i18n/I18nText";
 import { BackButton } from "@/components/layout/BackButton";
+import { LanguageMenu } from "@/components/layout/LanguageMenu";
 
 type AppHeaderProps = {
   showAuthActions?: boolean;
@@ -22,9 +24,10 @@ export function AppHeader({
             <span className="text-sm font-semibold text-stone-500">味迹</span>
           </Link>
         </div>
-        {showAuthActions ? (
-          <nav className="flex items-center gap-2">
-            {actions ?? (
+        <nav className="flex items-center gap-2">
+          <LanguageMenu />
+          {showAuthActions ? (
+            actions ?? (
               <Link
                 href="/settings"
                 aria-label="Settings"
@@ -32,10 +35,13 @@ export function AppHeader({
                 title="Settings"
               >
                 <Settings aria-hidden="true" className="size-4" />
+                <span className="sr-only">
+                  <I18nText k="header.settings" />
+                </span>
               </Link>
-            )}
-          </nav>
-        ) : null}
+            )
+          ) : null}
+        </nav>
       </div>
     </header>
   );

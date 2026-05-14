@@ -7,7 +7,7 @@ import {
   deleteLocalToEatItem,
   updateLocalToEatItem,
 } from "@/server/localStore";
-import { requireRouteSession } from "@/server/routeContext";
+import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
 import {
   createToEatItem,
   deleteToEatItem,
@@ -15,6 +15,9 @@ import {
 } from "@/server/services/toEatItems";
 
 export async function POST(request: Request) {
+  const originError = assertSameOrigin(request);
+  if (originError) return originError;
+
   const json = await request.json().catch(() => null);
   const parsed = createToEatItemSchema.safeParse(json);
 
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
     return jsonOk({ item: result.item, storage_mode: "local" });
   }
 
-  const session = await requireRouteSession();
+  const session = await requireSecureRouteSession(request);
   if (!session.ok) {
     return session.response;
   }
@@ -49,6 +52,9 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const originError = assertSameOrigin(request);
+  if (originError) return originError;
+
   const json = await request.json().catch(() => null);
   const parsed = updateToEatItemSchema.safeParse(json);
 
@@ -68,7 +74,7 @@ export async function PATCH(request: Request) {
     return jsonOk({ item: result.item, storage_mode: "local" });
   }
 
-  const session = await requireRouteSession();
+  const session = await requireSecureRouteSession(request);
   if (!session.ok) {
     return session.response;
   }
@@ -87,6 +93,9 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const originError = assertSameOrigin(request);
+  if (originError) return originError;
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
@@ -103,7 +112,7 @@ export async function DELETE(request: Request) {
     return jsonOk({ ok: true, storage_mode: "local" });
   }
 
-  const session = await requireRouteSession();
+  const session = await requireSecureRouteSession(request);
   if (!session.ok) {
     return session.response;
   }

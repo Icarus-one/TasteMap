@@ -33,7 +33,7 @@ export const photoTypeSchema = z.enum([
 
 export const analyzePhotoInputSchema = z.object({
   photo_url: z.string().url().optional(),
-  photo_base64: z.string().min(20).optional(),
+  photo_base64: z.string().min(20).max(8_000_000).optional(),
   photo_storage_path: z.string().optional(),
   exif: z
     .object({

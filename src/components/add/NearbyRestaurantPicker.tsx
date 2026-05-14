@@ -5,6 +5,7 @@ import type {
   RestaurantCandidate,
   RestaurantMatchCandidate,
 } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 
 export type RestaurantDraft = {
   mode: "existing" | "provider" | "manual";
@@ -36,12 +37,16 @@ export function NearbyRestaurantPicker({
   onChange,
   onSelectArchiveMatch,
 }: NearbyRestaurantPickerProps) {
+  const { t } = useI18n();
+
   return (
     <section className="grid gap-4">
       <div className="grid gap-1">
-        <h2 className="text-xl font-bold text-stone-950">Confirm restaurant</h2>
+        <h2 className="text-xl font-bold text-stone-950">
+          {t("restaurant.confirm.title")}
+        </h2>
         <p className="text-sm leading-6 text-stone-600">
-          Pick the closest match or keep it manual.
+          {t("restaurant.confirm.subtitle")}
         </p>
       </div>
 
@@ -50,11 +55,10 @@ export function NearbyRestaurantPicker({
           <div className="grid gap-1">
             <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-stone-700">
               <Link2 aria-hidden="true" className="size-4" />
-              Possible matches from your archive
+              {t("restaurant.matches.title")}
             </h3>
             <p className="text-sm leading-6 text-stone-600">
-              Same names can belong to different places. Reuse one only if this is
-              truly the same restaurant.
+              {t("restaurant.matches.subtitle")}
             </p>
           </div>
           <div className="grid gap-3">
@@ -79,7 +83,7 @@ export function NearbyRestaurantPicker({
                       <span className="font-bold text-stone-950">{match.name}</span>
                       <span className="text-sm text-stone-500">
                         {[match.city, match.address].filter(Boolean).join(" · ") ||
-                          "No location details yet"}
+                          t("restaurant.noLocation")}
                       </span>
                     </div>
                     <span className="rounded-lg bg-stone-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-stone-700">
@@ -171,18 +175,18 @@ export function NearbyRestaurantPicker({
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-5 text-sm leading-6 text-stone-600">
-          No nearby candidates yet. Add the restaurant manually and keep moving.
+          {t("restaurant.noCandidates")}
         </div>
       )}
 
       <div className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
         <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
           <PencilLine aria-hidden="true" className="size-4" />
-          Manual restaurant
+          {t("restaurant.manual.title")}
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-stone-700 sm:col-span-2">
-            Name
+            {t("restaurant.name")}
             <input
               value={selected.mode === "manual" ? selected.name : ""}
               onChange={(event) =>
@@ -196,11 +200,11 @@ export function NearbyRestaurantPicker({
                 if (selected.mode !== "manual") onChange(emptyManualRestaurant());
               }}
               className="h-11 rounded-lg border border-stone-200 px-3 font-normal outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
-              placeholder="Restaurant name"
+              placeholder={t("restaurant.namePlaceholder")}
             />
           </label>
           <label className="grid gap-1 text-sm font-semibold text-stone-700">
-            City
+            {t("restaurant.city")}
             <input
               value={selected.mode === "manual" ? (selected.city ?? "") : ""}
               onChange={(event) =>
@@ -219,7 +223,7 @@ export function NearbyRestaurantPicker({
             />
           </label>
           <label className="grid gap-1 text-sm font-semibold text-stone-700 sm:col-span-2">
-            Address
+            {t("restaurant.address")}
             <input
               value={selected.mode === "manual" ? (selected.address ?? "") : ""}
               onChange={(event) =>
@@ -234,7 +238,7 @@ export function NearbyRestaurantPicker({
                 })
               }
               className="h-11 rounded-lg border border-stone-200 px-3 font-normal outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
-              placeholder="Optional"
+              placeholder={t("restaurant.addressPlaceholder")}
             />
           </label>
         </div>

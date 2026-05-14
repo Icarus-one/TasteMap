@@ -7,6 +7,7 @@ type ShareActionButtonProps = {
   title: string;
   text: string;
   urlPath?: string;
+  shareEndpoint?: string;
   label?: string;
   className?: string;
 };
@@ -15,18 +16,34 @@ export function ShareActionButton({
   title,
   text,
   urlPath,
+  shareEndpoint,
   label = "Share",
   className = "inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-800 transition hover:border-stone-300",
 }: ShareActionButtonProps) {
-  const [status, setStatus] = useState<"idle" | "copied">("idle");
+  const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
 
   async function handleShare() {
-    const url =
+    let url =
       typeof window !== "undefined"
         ? urlPath
           ? new URL(urlPath, window.location.origin).toString()
           : window.location.href
         : undefined;
+
+    if (shareEndpoint) {
+      const response = await fetch(shareEndpoint, { method: "POST" });
+      const payload = (await response.json().catch(() => null)) as {
+        url?: string;
+      } | null;
+
+      if (!response.ok || !payload?.url) {
+        setStatus("error");
+        window.setTimeout(() => setStatus("idle"), 2200);
+        return;
+      }
+
+      url = payload.url;
+    }
 
     try {
       if (navigator.share) {
@@ -55,6 +72,11 @@ export function ShareActionButton({
         <>
           <Check aria-hidden="true" className="size-4" />
           Copied
+        </>
+      ) : status === "error" ? (
+        <>
+          <Share2 aria-hidden="true" className="size-4" />
+          Try again
         </>
       ) : (
         <>

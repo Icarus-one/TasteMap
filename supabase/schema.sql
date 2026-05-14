@@ -42,7 +42,6 @@ create table if not exists visits (
   user_id uuid not null references auth.users(id) on delete cascade,
   restaurant_id uuid not null references restaurants(id) on delete cascade,
   visit_date date,
-  taken_at timestamptz,
   companions text,
   average_price numeric,
   total_score numeric check (total_score >= 0 and total_score <= 5),
@@ -62,7 +61,8 @@ create table if not exists visits (
   ai_generated boolean default false,
   user_confirmed boolean default false,
   created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  updated_at timestamptz default now(),
+  taken_at timestamptz
 );
 
 create table if not exists dishes (
@@ -97,7 +97,6 @@ create table if not exists photos (
   public_url text,
   photo_type text check (photo_type in ('dish', 'menu', 'restaurant', 'receipt', 'unknown')) default 'unknown',
   caption text,
-  taken_at timestamptz,
   exif_exists boolean default false,
   exif_latitude double precision,
   exif_longitude double precision,
@@ -105,7 +104,8 @@ create table if not exists photos (
   ai_analysis_json jsonb,
   ai_detected_dishes jsonb,
   ai_confidence text check (ai_confidence in ('high', 'medium', 'low', 'unknown')) default 'unknown',
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  taken_at timestamptz
 );
 
 create table if not exists place_candidates (
@@ -153,6 +153,15 @@ create table if not exists to_eat_items (
   updated_at timestamptz default now()
 );
 
+create table if not exists shared_restaurant_links (
+  token text primary key default encode(gen_random_bytes(18), 'hex'),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  restaurant_id uuid not null references restaurants(id) on delete cascade,
+  created_at timestamptz default now(),
+  last_used_at timestamptz,
+  unique (user_id, restaurant_id)
+);
+
 create index if not exists restaurants_user_provider_idx
   on restaurants (user_id, provider_place_id)
   where provider_place_id is not null;
@@ -166,3 +175,5 @@ create index if not exists dishes_user_visit_idx on dishes (user_id, visit_id);
 create index if not exists photos_user_visit_idx on photos (user_id, visit_id);
 create index if not exists place_candidates_user_visit_idx on place_candidates (user_id, visit_id);
 create index if not exists to_eat_items_user_status_idx on to_eat_items (user_id, status, created_at desc);
+create index if not exists shared_restaurant_links_restaurant_idx
+  on shared_restaurant_links (restaurant_id);

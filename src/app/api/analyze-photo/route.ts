@@ -1,5 +1,9 @@
 import { analyzePhotoInputSchema } from "@/lib/validators";
 import { getOpenAIModel } from "@/lib/env";
+import {
+  checkRateLimit,
+  requireSecureRouteSession,
+} from "@/server/security";
 
 const confidenceValues = ["high", "medium", "low", "unknown"] as const;
 
@@ -58,6 +62,18 @@ const foodPhotoAnalysisSchema = {
 } as const;
 
 export async function POST(request: Request) {
+  const session = await requireSecureRouteSession(request);
+  if (!session.ok) {
+    return session.response;
+  }
+
+  const rateLimitError = checkRateLimit({
+    key: `analyze-photo:${session.user.id}`,
+    limit: 30,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (rateLimitError) return rateLimitError;
+
   const json = await request.json().catch(() => null);
   const parsed = analyzePhotoInputSchema.safeParse(json);
 

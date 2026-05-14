@@ -100,7 +100,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
               <ShareActionButton
                 title={restaurant.name}
                 text={shareText}
-                urlPath={`/restaurants/${restaurant.id}`}
+                shareEndpoint={`/api/share/restaurants/${restaurant.id}`}
                 label="Share"
               />
               <ScoreBadge

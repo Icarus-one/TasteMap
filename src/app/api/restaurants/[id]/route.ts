@@ -5,13 +5,16 @@ import {
   deleteLocalRestaurant,
   updateLocalRestaurant,
 } from "@/server/localStore";
-import { requireRouteSession } from "@/server/routeContext";
+import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
 
 type RestaurantRouteContext = {
   params: Promise<{ id: string }>;
 };
 
 export async function PATCH(request: Request, context: RestaurantRouteContext) {
+  const originError = assertSameOrigin(request);
+  if (originError) return originError;
+
   const { id } = await context.params;
   const json = await request.json().catch(() => null);
   const parsed = updateRestaurantSchema.safeParse(json);
@@ -31,7 +34,7 @@ export async function PATCH(request: Request, context: RestaurantRouteContext) {
     return jsonOk({ restaurant: result.restaurant, storage_mode: "local" });
   }
 
-  const session = await requireRouteSession();
+  const session = await requireSecureRouteSession(request);
   if (!session.ok) {
     return session.response;
   }
@@ -57,9 +60,12 @@ export async function PATCH(request: Request, context: RestaurantRouteContext) {
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: RestaurantRouteContext,
 ) {
+  const originError = assertSameOrigin(request);
+  if (originError) return originError;
+
   const { id } = await context.params;
 
   if (!hasSupabasePublicEnv()) {
@@ -71,7 +77,7 @@ export async function DELETE(
     return jsonOk({ ok: true, storage_mode: "local" });
   }
 
-  const session = await requireRouteSession();
+  const session = await requireSecureRouteSession(request);
   if (!session.ok) {
     return session.response;
   }

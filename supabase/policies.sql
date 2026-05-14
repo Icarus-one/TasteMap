@@ -6,6 +6,7 @@ alter table dishes enable row level security;
 alter table photos enable row level security;
 alter table place_candidates enable row level security;
 alter table to_eat_items enable row level security;
+alter table shared_restaurant_links enable row level security;
 
 drop policy if exists "Users can manage own profile" on profiles;
 create policy "Users can manage own profile"
@@ -52,5 +53,11 @@ with check (auth.uid() = user_id);
 drop policy if exists "Users can manage own to-eat items" on to_eat_items;
 create policy "Users can manage own to-eat items"
 on to_eat_items for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users can manage own shared restaurant links" on shared_restaurant_links;
+create policy "Users can manage own shared restaurant links"
+on shared_restaurant_links for all
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);

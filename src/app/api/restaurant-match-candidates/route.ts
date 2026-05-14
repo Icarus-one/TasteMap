@@ -2,10 +2,13 @@ import { hasSupabasePublicEnv } from "@/lib/env";
 import { restaurantMatchQuerySchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { searchLocalRestaurantMatches } from "@/server/localStore";
-import { requireRouteSession } from "@/server/routeContext";
+import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
 import { searchRestaurantMatchCandidates } from "@/server/services/restaurantMatches";
 
 export async function POST(request: Request) {
+  const originError = assertSameOrigin(request);
+  if (originError) return originError;
+
   const json = await request.json().catch(() => null);
   const parsed = restaurantMatchQuerySchema.safeParse(json);
 
@@ -20,7 +23,7 @@ export async function POST(request: Request) {
     return jsonOk({ candidates, storage_mode: "local" });
   }
 
-  const session = await requireRouteSession();
+  const session = await requireSecureRouteSession(request);
   if (!session.ok) {
     return session.response;
   }
