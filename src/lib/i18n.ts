@@ -147,6 +147,15 @@ const messages = {
     "auth.checkEmail": "Check your email to confirm the account, then sign in.",
     "auth.missingSupabase":
       "Supabase env vars are missing. Add .env.local before using auth.",
+    "auth.oauthStartFailed":
+      "Could not open this provider. Check that it is enabled in Supabase Auth.",
+    "auth.confirmed.title": "Account confirmed",
+    "auth.confirmed.subtitle":
+      "Your sign-in is complete. Continue to TasteMap to finish anything still needed.",
+    "auth.error.title": "Sign-in link could not be completed",
+    "auth.error.subtitle":
+      "The link may have expired, the provider may not be configured, or the redirect URL may be missing in Supabase.",
+    "auth.continue": "Continue",
 
     "add.hero.eyebrow": "Photo-first record",
     "add.hero.title": "Turn a meal photo into a private memory.",
@@ -362,6 +371,12 @@ const messages = {
     "auth.newToTasteMap": "第一次使用 TasteMap？",
     "auth.checkEmail": "请查看邮箱确认账号，然后登录。",
     "auth.missingSupabase": "缺少 Supabase 环境变量。使用登录前请先添加 .env.local。",
+    "auth.oauthStartFailed": "无法打开这个登录方式。请检查它是否已在 Supabase Auth 中启用。",
+    "auth.confirmed.title": "账号已确认",
+    "auth.confirmed.subtitle": "登录已完成。继续进入 TasteMap，完成剩余设置。",
+    "auth.error.title": "无法完成登录链接",
+    "auth.error.subtitle": "链接可能已过期，第三方登录可能未配置，或 Supabase 缺少回调地址。",
+    "auth.continue": "继续",
 
     "add.hero.eyebrow": "照片优先记录",
     "add.hero.title": "把一张饭照变成私人的美食记忆。",
@@ -585,6 +600,15 @@ const messages = {
     "auth.checkEmail": "Confirmez votre compte par e-mail, puis connectez-vous.",
     "auth.missingSupabase":
       "Variables Supabase manquantes. Ajoutez .env.local avant d'utiliser l'authentification.",
+    "auth.oauthStartFailed":
+      "Impossible d'ouvrir ce fournisseur. Vérifiez qu'il est activé dans Supabase Auth.",
+    "auth.confirmed.title": "Compte confirmé",
+    "auth.confirmed.subtitle":
+      "La connexion est terminée. Continuez vers TasteMap pour finir les réglages nécessaires.",
+    "auth.error.title": "Impossible de terminer ce lien de connexion",
+    "auth.error.subtitle":
+      "Le lien a peut-être expiré, le fournisseur n'est peut-être pas configuré, ou l'URL de redirection manque dans Supabase.",
+    "auth.continue": "Continuer",
 
     "add.hero.eyebrow": "Note à partir d'une photo",
     "add.hero.title": "Transformez une photo de repas en souvenir privé.",

@@ -72,7 +72,7 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
           options: {
             emailRedirectTo: redirectTo.toString(),
             data: {
-              display_name: displayName.trim(),
+              display_name: effectiveDisplayName.trim(),
               handle: normalizedHandle,
             },
           },
@@ -96,7 +96,7 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          display_name: displayName.trim(),
+          display_name: effectiveDisplayName.trim(),
           handle: normalizedHandle,
           avatar_url: "",
         }),
@@ -271,17 +271,33 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
     const redirectTo = new URL("/auth/callback", window.location.origin);
     redirectTo.searchParams.set("next", sanitizeNextPath(nextPath));
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: redirectTo.toString(),
+        skipBrowserRedirect: true,
+        queryParams:
+          provider === "google"
+            ? {
+                prompt: "select_account",
+              }
+            : undefined,
       },
     });
 
     if (error) {
       setOauthProvider(null);
       setMessage(error.message);
+      return;
     }
+
+    if (!data.url) {
+      setOauthProvider(null);
+      setMessage(t("auth.oauthStartFailed"));
+      return;
+    }
+
+    window.location.assign(data.url);
   }
 }
 

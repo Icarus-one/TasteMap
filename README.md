@@ -258,8 +258,31 @@ Recommended deployment:
 For auth callback support, make sure Supabase includes:
 
 ```text
+http://localhost:3000/auth/callback
 https://your-domain.com/auth/callback
 ```
+
+### Supabase Auth checklist
+
+In Supabase, open `Authentication -> URL Configuration` and set:
+
+```text
+Site URL: https://your-domain.com
+Redirect URLs:
+  http://localhost:3000/auth/callback
+  https://your-domain.com/auth/callback
+```
+
+For social login, enable each provider in `Authentication -> Providers`.
+The OAuth app callback URL configured at Google, GitHub, or Facebook should be
+the Supabase callback URL, not the TasteMap callback URL:
+
+```text
+https://<your-project-ref>.supabase.co/auth/v1/callback
+```
+
+TasteMap then receives the final app callback at `/auth/callback`, exchanges the
+code for a session, and sends the user through `/auth/confirmed` or `/auth/error`.
 
 ## Current status
 
