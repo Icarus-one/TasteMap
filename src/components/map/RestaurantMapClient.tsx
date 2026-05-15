@@ -37,6 +37,7 @@ export function RestaurantMapClient({
   missingLocationCount,
 }: RestaurantMapClientProps) {
   const { t } = useI18n();
+  const mapLoadError = t("map.loadError");
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<GoogleMap | null>(null);
   const markersRef = useRef<GoogleMarker[]>([]);
@@ -115,13 +116,13 @@ export function RestaurantMapClient({
       .catch((caught) => {
         if (cancelled) return;
         setStatus("error");
-        setMessage(errorMessage(caught, t("map.loadError")));
+        setMessage(errorMessage(caught, mapLoadError));
       });
 
     return () => {
       cancelled = true;
     };
-  }, [apiKey, points, t]);
+  }, [apiKey, mapLoadError, points]);
 
   function focusPoint(point: RestaurantMapPoint) {
     setSelectedId(point.id);

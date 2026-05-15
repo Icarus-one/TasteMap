@@ -39,6 +39,10 @@ export function AddressMapPicker({
   onChange,
 }: AddressMapPickerProps) {
   const { t } = useI18n();
+  const locationClickHint = t("restaurant.location.clickHint");
+  const locationLoading = t("restaurant.location.loading");
+  const locationSearchFailed = t("restaurant.location.searchFailed");
+  const mapLoadError = t("map.loadError");
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<GoogleMap | null>(null);
   const markerRef = useRef<GoogleMarker | null>(null);
@@ -91,7 +95,7 @@ export function AddressMapPicker({
         setDraft(nextDraft);
         setQuery(nextDraft.address);
         setStatus("ready");
-        setMessage(t("restaurant.location.clickHint"));
+        setMessage(locationClickHint);
 
         if (mapInstanceRef.current) {
           mapInstanceRef.current.setCenter(point);
@@ -109,16 +113,17 @@ export function AddressMapPicker({
         }
       } catch (caught) {
         setStatus("error");
-        setMessage(errorMessage(caught, t("restaurant.location.searchFailed")));
+        setMessage(errorMessage(caught, locationSearchFailed));
       }
     },
     [
       apiKey,
+      locationClickHint,
+      locationSearchFailed,
       selected.address,
       selected.city,
       selected.country,
       selected.name,
-      t,
     ],
   );
   useEffect(() => {
@@ -130,7 +135,7 @@ export function AddressMapPicker({
 
     let cancelled = false;
     setStatus("loading");
-    setMessage(t("restaurant.location.loading"));
+    setMessage(locationLoading);
 
     loadGoogleMaps(apiKey)
       .then(async (google) => {
@@ -169,25 +174,34 @@ export function AddressMapPicker({
         });
 
         setStatus("ready");
-        setMessage(t("restaurant.location.clickHint"));
+        setMessage(locationClickHint);
       })
       .catch((caught) => {
         if (cancelled) return;
         setStatus("error");
-        setMessage(errorMessage(caught, t("map.loadError")));
+        setMessage(errorMessage(caught, mapLoadError));
       });
 
     return () => {
       cancelled = true;
     };
-  }, [apiKey, draft?.point, isOpen, selected, selectPoint, t]);
+  }, [
+    apiKey,
+    draft?.point,
+    isOpen,
+    locationClickHint,
+    locationLoading,
+    mapLoadError,
+    selected,
+    selectPoint,
+  ]);
 
   async function searchAddress() {
     const trimmed = query.trim();
     if (!trimmed || !apiKey) return;
 
     setStatus("loading");
-    setMessage(t("restaurant.location.loading"));
+    setMessage(locationLoading);
 
     try {
       const google = await loadGoogleMaps(apiKey);
@@ -199,7 +213,7 @@ export function AddressMapPicker({
 
       if (!location) {
         setStatus("ready");
-        setMessage(t("restaurant.location.searchFailed"));
+        setMessage(locationSearchFailed);
         return;
       }
 
@@ -209,7 +223,7 @@ export function AddressMapPicker({
       );
     } catch (caught) {
       setStatus("error");
-      setMessage(errorMessage(caught, t("restaurant.location.searchFailed")));
+      setMessage(errorMessage(caught, locationSearchFailed));
     }
   }
 

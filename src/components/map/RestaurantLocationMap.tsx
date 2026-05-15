@@ -25,6 +25,7 @@ export function RestaurantLocationMap({
   longitude,
 }: RestaurantLocationMapProps) {
   const { t } = useI18n();
+  const mapLoadError = t("map.loadError");
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<GoogleMap | null>(null);
   const markerRef = useRef<GoogleMarker | null>(null);
@@ -79,13 +80,13 @@ export function RestaurantLocationMap({
       .catch((caught) => {
         if (cancelled) return;
         setStatus("error");
-        setMessage(errorMessage(caught, t("map.loadError")));
+        setMessage(errorMessage(caught, mapLoadError));
       });
 
     return () => {
       cancelled = true;
     };
-  }, [apiKey, latitude, longitude, name, t]);
+  }, [apiKey, latitude, longitude, mapLoadError, name]);
 
   if (typeof latitude !== "number" || typeof longitude !== "number") {
     return (
