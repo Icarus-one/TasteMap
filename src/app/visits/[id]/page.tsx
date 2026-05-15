@@ -15,8 +15,9 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { PhotoGallery } from "@/components/detail/PhotoGallery";
 import { ShareActionButton } from "@/components/share/ShareActionButton";
 import { UserText } from "@/components/i18n/UserText";
+import { RestaurantLocationMap } from "@/components/map/RestaurantLocationMap";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
-import { formatAveragePrice, formatDate } from "@/lib/format";
+import { compactAddress, formatAveragePrice, formatDate } from "@/lib/format";
 import { getVisitById } from "@/lib/data";
 import { buildVisitShareText } from "@/lib/share";
 import type { VisitWithRelations } from "@/lib/types";
@@ -100,6 +101,17 @@ export default async function VisitPage({ params }: VisitPageProps) {
           <h2 className="text-xl font-bold text-stone-950">Photos</h2>
           <PhotoGallery photos={visit.photos} />
         </section>
+
+        <RestaurantLocationMap
+          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? null}
+          name={visit.restaurants?.name ?? "Unknown restaurant"}
+          address={compactAddress(
+            visit.restaurants?.city ?? null,
+            visit.restaurants?.address ?? null,
+          )}
+          latitude={visit.restaurants?.latitude ?? null}
+          longitude={visit.restaurants?.longitude ?? null}
+        />
 
         <section className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
           <div className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">

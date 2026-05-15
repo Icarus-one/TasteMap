@@ -112,10 +112,10 @@ export function RestaurantMapClient({
         map.fitBounds(bounds, 56);
         setStatus("ready");
       })
-      .catch(() => {
+      .catch((caught) => {
         if (cancelled) return;
         setStatus("error");
-        setMessage(t("map.loadError"));
+        setMessage(errorMessage(caught, t("map.loadError")));
       });
 
     return () => {
@@ -213,6 +213,10 @@ export function RestaurantMapClient({
       </aside>
     </div>
   );
+}
+
+function errorMessage(caught: unknown, fallback: string) {
+  return caught instanceof Error ? caught.message : fallback;
 }
 
 function SelectedRestaurantCard({ point }: { point: RestaurantMapPoint }) {

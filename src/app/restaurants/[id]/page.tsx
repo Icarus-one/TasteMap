@@ -14,6 +14,7 @@ import { RestaurantCardActionsMenu } from "@/components/detail/RestaurantCardAct
 import { ShareActionButton } from "@/components/share/ShareActionButton";
 import { UserText } from "@/components/i18n/UserText";
 import { VisitCard } from "@/components/cards/VisitCard";
+import { RestaurantLocationMap } from "@/components/map/RestaurantLocationMap";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { compactAddress, formatDate } from "@/lib/format";
 import { getRestaurantById } from "@/lib/data";
@@ -122,6 +123,14 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
           <h2 className="text-xl font-bold text-stone-950">Photo wall</h2>
           <PhotoGallery photos={galleryPhotos} />
         </section>
+
+        <RestaurantLocationMap
+          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? null}
+          name={restaurant.name}
+          address={compactAddress(restaurant.city, restaurant.address)}
+          latitude={restaurant.latitude}
+          longitude={restaurant.longitude}
+        />
 
         <section className="grid gap-4 md:grid-cols-3">
           <DishList

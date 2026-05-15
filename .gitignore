@@ -34,6 +34,7 @@ yarn-error.log*
 .env*
 ChatGPT_API.txt
 Google_map_API_key.txt
+client_secret_*.json
 
 # vercel
 .vercel

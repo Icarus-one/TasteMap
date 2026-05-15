@@ -107,9 +107,9 @@ export function AddressMapPicker({
             },
           );
         }
-      } catch {
+      } catch (caught) {
         setStatus("error");
-        setMessage(t("restaurant.location.searchFailed"));
+        setMessage(errorMessage(caught, t("restaurant.location.searchFailed")));
       }
     },
     [
@@ -171,10 +171,10 @@ export function AddressMapPicker({
         setStatus("ready");
         setMessage(t("restaurant.location.clickHint"));
       })
-      .catch(() => {
+      .catch((caught) => {
         if (cancelled) return;
         setStatus("error");
-        setMessage(t("map.loadError"));
+        setMessage(errorMessage(caught, t("map.loadError")));
       });
 
     return () => {
@@ -207,9 +207,9 @@ export function AddressMapPicker({
         { lat: location.lat(), lng: location.lng() },
         { geocoderResult: result, reverseGeocode: false },
       );
-    } catch {
+    } catch (caught) {
       setStatus("error");
-      setMessage(t("restaurant.location.searchFailed"));
+      setMessage(errorMessage(caught, t("restaurant.location.searchFailed")));
     }
   }
 
@@ -385,4 +385,8 @@ function componentName(components: GoogleAddressComponent[] | undefined, types: 
 
 function isNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function errorMessage(caught: unknown, fallback: string) {
+  return caught instanceof Error ? caught.message : fallback;
 }

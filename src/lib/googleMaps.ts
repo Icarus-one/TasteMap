@@ -99,6 +99,7 @@ declare global {
   interface Window {
     google?: GoogleMapsApi;
     initTasteMapGoogleMap?: () => void;
+    gm_authFailure?: () => void;
   }
 }
 
@@ -112,12 +113,41 @@ export async function loadGoogleMaps(apiKey: string) {
   if (googleMapsPromise) return googleMapsPromise;
 
   googleMapsPromise = new Promise((resolve, reject) => {
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      googleMapsPromise = null;
+      reject(
+        new Error(
+          "Google Maps timed out. Check that the browser API key is deployed, billing is enabled, and the current domain is allowed.",
+        ),
+      );
+    }, 12000);
+
+    function fail(message: string) {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      googleMapsPromise = null;
+      reject(new Error(message));
+    }
+
     window.initTasteMapGoogleMap = () => {
+      if (settled) return;
       if (window.google?.maps) {
+        settled = true;
+        window.clearTimeout(timeout);
         resolve(window.google);
       } else {
-        reject(new Error("Google Maps did not initialize."));
+        fail("Google Maps did not initialize.");
       }
+    };
+
+    window.gm_authFailure = () => {
+      fail(
+        "Google Maps rejected this key. Check API key value, HTTP referrer restrictions, enabled APIs, billing, and redeploy Vercel after env changes.",
+      );
     };
 
     const script = document.createElement("script");
@@ -129,7 +159,11 @@ export async function loadGoogleMaps(apiKey: string) {
     });
     script.src = `https://maps.googleapis.com/maps/api/js?${params.toString()}`;
     script.async = true;
-    script.onerror = () => reject(new Error("Google Maps failed to load."));
+    script.onerror = () => {
+      fail(
+        "Google Maps script failed to load. Check network access, API key restrictions, and whether Maps JavaScript API is enabled.",
+      );
+    };
     document.head.appendChild(script);
   });
 

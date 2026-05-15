@@ -25,18 +25,23 @@ type PhotoStorageClient = {
   };
 };
 
-export async function getSharedRestaurantById(id: string) {
+export async function getSharedRestaurantById(id: string, ownerId?: string) {
   const supabase = createSupabaseAdminClient();
 
   if (!supabase) {
     return null;
   }
 
-  const { data } = await supabase
+  let query = supabase
     .from("restaurants")
     .select("*, visits(*, dishes(*), photos(*)), dishes(*), photos(*)")
-    .eq("id", id)
-    .single();
+    .eq("id", id);
+
+  if (ownerId) {
+    query = query.eq("user_id", ownerId);
+  }
+
+  const { data } = await query.single();
 
   const restaurant = (data as RestaurantWithRelations | null) ?? null;
 
@@ -74,7 +79,7 @@ export async function getSharedRestaurantByToken(token: string) {
     .eq("token", token);
 
   const [restaurant, profileResult] = await Promise.all([
-    getSharedRestaurantById(share.restaurant_id),
+    getSharedRestaurantById(share.restaurant_id, share.user_id),
     supabase.from("profiles").select("*").eq("id", share.user_id).maybeSingle(),
   ]);
 

@@ -78,6 +78,9 @@ const messages = {
       "Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to show the interactive Google Map.",
     "map.loadError": "Google Maps could not load. Check the browser API key and domain restrictions.",
     "map.empty": "No restaurants with saved coordinates yet. Add a log from a photo location or Google Places match first.",
+    "map.locationTitle": "Restaurant location",
+    "map.noRestaurantLocation":
+      "This restaurant does not have a saved map point yet. Edit the location from a new post to place it on the map.",
 
     "settings.eyebrow": "Settings",
     "settings.title": "Private archive",
@@ -310,6 +313,8 @@ const messages = {
     "map.missingKey": "添加 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY 后即可显示 Google 互动地图。",
     "map.loadError": "Google Maps 加载失败。请检查浏览器 API key 和域名限制。",
     "map.empty": "还没有带坐标的餐厅。先从照片位置或 Google Places 匹配保存一条记录。",
+    "map.locationTitle": "餐厅位置",
+    "map.noRestaurantLocation": "这家餐厅还没有保存地图点。可以在发布新记录时重选位置。",
 
     "settings.eyebrow": "设置",
     "settings.title": "私人归档",
@@ -529,6 +534,9 @@ const messages = {
       "Google Maps n'a pas pu charger. Vérifiez la clé navigateur et les restrictions de domaine.",
     "map.empty":
       "Aucun restaurant avec coordonnées pour le moment. Ajoutez d'abord une note avec position photo ou correspondance Google Places.",
+    "map.locationTitle": "Position du restaurant",
+    "map.noRestaurantLocation":
+      "Ce restaurant n'a pas encore de point enregistré. Ajoutez-le depuis une nouvelle note.",
 
     "settings.eyebrow": "Paramètres",
     "settings.title": "Archive privée",

@@ -95,14 +95,17 @@ export async function getDashboardData() {
     context.supabase
       .from("restaurants")
       .select("*, visits(*), dishes(*), photos(*)")
+      .eq("user_id", context.user.id)
       .order("updated_at", { ascending: false }),
     context.supabase
       .from("visits")
       .select("*, restaurants(*), dishes(*), photos(*)")
+      .eq("user_id", context.user.id)
       .order("created_at", { ascending: false }),
     context.supabase
       .from("to_eat_items")
       .select("*")
+      .eq("user_id", context.user.id)
       .order("created_at", { ascending: false }),
   ]);
 
@@ -142,6 +145,7 @@ export async function getRestaurantById(id: string) {
     .from("restaurants")
     .select("*, visits(*, dishes(*), photos(*)), dishes(*), photos(*)")
     .eq("id", id)
+    .eq("user_id", context.user.id)
     .single();
 
   const restaurant = (data as RestaurantWithRelations | null) ?? null;
@@ -162,6 +166,7 @@ export async function getVisitById(id: string) {
     .from("visits")
     .select("*, restaurants(*), dishes(*), photos(*)")
     .eq("id", id)
+    .eq("user_id", context.user.id)
     .single();
 
   const visit = (data as VisitWithRelations | null) ?? null;
@@ -180,6 +185,7 @@ export async function getToEatItemById(id: string) {
     .from("to_eat_items")
     .select("*")
     .eq("id", id)
+    .eq("user_id", context.user.id)
     .single();
 
   return (data as ToEatItem | null) ?? null;
@@ -196,6 +202,7 @@ export async function getAvailableVisitTags() {
   const { data } = await context.supabase
     .from("visits")
     .select("suitable_scenarios")
+    .eq("user_id", context.user.id)
     .order("created_at", { ascending: false });
 
   return collectUniqueTags((data as Array<{ suitable_scenarios?: string[] | null }> | null) ?? []);
