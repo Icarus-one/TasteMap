@@ -231,10 +231,10 @@ export function FriendsHubClient({
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-5 sm:gap-6">
       <section className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+        <div className="grid gap-3 sm:flex sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <h2 className="text-xl font-bold text-stone-950">Friend bar</h2>
             <p className="text-sm text-stone-500">
               Your TasteMap ID:{" "}
@@ -264,7 +264,7 @@ export function FriendsHubClient({
           <button
             type="submit"
             disabled={isWorking || !handle.trim()}
-            className="inline-flex h-11 items-center justify-center gap-2 self-end rounded-lg bg-stone-950 px-4 text-sm font-bold text-white transition hover:bg-stone-800 disabled:opacity-60"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 self-end rounded-lg bg-stone-950 px-4 text-sm font-bold text-white transition hover:bg-stone-800 disabled:opacity-60 sm:w-auto"
           >
             {isWorking ? (
               <Loader2 aria-hidden="true" className="size-4 animate-spin" />
@@ -287,7 +287,7 @@ export function FriendsHubClient({
         ) : null}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-3 sm:gap-4 lg:grid-cols-3">
         <Panel title="Friends" icon={<Users aria-hidden="true" className="size-5" />}>
           {friends.length ? (
             friends.map((item) => (
@@ -340,10 +340,10 @@ export function FriendsHubClient({
         </Panel>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+      <section className="grid gap-3 sm:gap-4 lg:grid-cols-[0.8fr_1.2fr]">
         <form
           onSubmit={createList}
-          className="grid gap-4 rounded-lg border border-stone-200 bg-white p-4 shadow-sm"
+          className="grid gap-4 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div>
             <p className="text-sm font-semibold uppercase text-emerald-700">
@@ -411,7 +411,7 @@ export function FriendsHubClient({
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid gap-3 sm:gap-4 lg:grid-cols-2">
         <CardInbox title="Cards from friends" cards={cards} empty="No cards sent to you yet." />
         <CardInbox title="Cards you sent" cards={sentCards} empty="No sent cards yet." />
       </section>
@@ -429,7 +429,7 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="grid content-start gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+    <section className="grid content-start gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
       <h2 className="flex items-center gap-2 text-lg font-bold text-stone-950">
         {icon}
         {title}
@@ -472,11 +472,11 @@ function FriendRow({
           </p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         <button
           type="button"
           onClick={onAction}
-          className="inline-flex h-9 items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 transition hover:border-stone-300"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 transition hover:border-stone-300"
         >
           {actionIcon}
           {actionLabel}
@@ -485,7 +485,7 @@ function FriendRow({
           <button
             type="button"
             onClick={onSecondaryAction}
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 text-sm font-semibold text-rose-800 transition hover:bg-rose-100"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 text-sm font-semibold text-rose-800 transition hover:bg-rose-100"
           >
             {secondaryActionIcon}
             {secondaryActionLabel}
@@ -506,7 +506,7 @@ function ListSection({
   empty: string;
 }) {
   return (
-    <section className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+    <section className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
       <h2 className="text-lg font-bold text-stone-950">{title}</h2>
       {lists.length ? (
         <div className="grid gap-3">
@@ -564,7 +564,7 @@ function CardInbox({
   empty: string;
 }) {
   return (
-    <section className="grid content-start gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+    <section className="grid content-start gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
       <h2 className="text-lg font-bold text-stone-950">{title}</h2>
       {cards.length ? (
         <div className="grid gap-3">

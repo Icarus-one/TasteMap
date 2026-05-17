@@ -52,7 +52,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
   const weightedScore = getWeightedRestaurantScore(restaurant);
 
   return (
-    <main className="min-h-screen bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
       <AppHeader
         actions={
           <RestaurantCardActionsMenu
@@ -65,7 +65,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
           />
         }
       />
-      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:gap-8 sm:px-6 sm:py-8">
         <section className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
           <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <div className="grid gap-3">
@@ -86,7 +86,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 <UserText
                   as="h1"
                   text={restaurant.name}
-                  className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                  className="text-2xl font-bold text-stone-950 sm:text-4xl"
                   translationClassName="text-sm leading-6 text-stone-500"
                 />
                 <p className="flex items-center gap-2 text-sm text-stone-500">
@@ -103,7 +103,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 />
               ) : null}
             </div>
-            <div className="flex flex-wrap gap-2 md:justify-end">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap md:justify-end">
               <AddRestaurantToListButton
                 restaurantId={restaurant.id}
                 restaurantName={restaurant.name}

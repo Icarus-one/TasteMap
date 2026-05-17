@@ -30,7 +30,7 @@ export function ProfileMenu({ profile, compact = false }: ProfileMenuProps) {
   return (
     <Link
       href="/profile"
-      className={`inline-flex h-10 items-center gap-2 rounded-lg border border-stone-200 bg-white px-2 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-stone-50 ${compact ? "max-w-36" : "max-w-56"}`}
+      className={`inline-flex h-10 items-center gap-2 rounded-lg border border-stone-200 bg-white px-1.5 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-stone-50 sm:px-2 ${compact ? "sm:max-w-36" : "sm:max-w-56"}`}
       aria-label={t("profile.title")}
       title={t("profile.title")}
     >
@@ -46,7 +46,9 @@ export function ProfileMenu({ profile, compact = false }: ProfileMenuProps) {
           {profileInitial(profile)}
         </span>
       )}
-      <span className="min-w-0 text-left">
+      <span
+        className={`${compact ? "hidden min-w-0 text-left sm:block" : "min-w-0 text-left"}`}
+      >
         <span className="block truncate leading-4">
           {profile.display_name ?? t("profile.title")}
         </span>

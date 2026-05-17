@@ -39,9 +39,9 @@ export default async function VisitPage({ params }: VisitPageProps) {
   const shareText = buildVisitShareText(visit);
 
   return (
-    <main className="min-h-screen bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
       <AppHeader />
-      <div className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid w-full max-w-5xl gap-5 px-4 py-5 sm:gap-8 sm:px-6 sm:py-8">
         <Link
           href={
             visit.restaurants?.id ? `/restaurants/${visit.restaurants.id}` : "/"
@@ -62,7 +62,7 @@ export default async function VisitPage({ params }: VisitPageProps) {
               <UserText
                 as="h1"
                 text={visit.restaurants?.name ?? "Unknown restaurant"}
-                className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                className="text-2xl font-bold text-stone-950 sm:text-4xl"
                 translationClassName="text-sm leading-6 text-stone-500"
               />
               {visit.summary ? (
@@ -86,7 +86,7 @@ export default async function VisitPage({ params }: VisitPageProps) {
                 </div>
               ) : null}
             </div>
-            <div className="flex flex-wrap gap-2 md:justify-end">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap md:justify-end">
               <ShareActionButton
                 title={visit.restaurants?.name ?? "Restaurant log"}
                 text={shareText}

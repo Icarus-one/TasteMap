@@ -16,9 +16,12 @@ import {
   Sparkles,
   Star,
   Tags,
+  Users,
 } from "lucide-react";
 import { NewEntryMenu } from "@/components/layout/NewEntryMenu";
 import { LanguageMenu } from "@/components/layout/LanguageMenu";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { PwaInstallButton } from "@/components/layout/PwaInstallButton";
 import { UserText } from "@/components/i18n/UserText";
 import { ProfileMenu } from "@/components/profile/ProfileMenu";
 import { compactAddress } from "@/lib/format";
@@ -71,20 +74,34 @@ export function DashboardClient({
   );
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#fff8e8_0%,#fffdf8_16rem,#ffffff_36rem)]">
-      <header className="border-b border-amber-100 bg-[#ffd469]/70 px-4 py-6 backdrop-blur sm:px-6">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#fff8e8_0%,#fffdf8_16rem,#ffffff_36rem)] pb-24 sm:pb-0">
+      <header className="border-b border-amber-100 bg-[#ffd469]/70 px-4 py-5 backdrop-blur sm:px-6 sm:py-6">
         <div className="mx-auto grid max-w-6xl gap-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="grid gap-2">
-              <ProfileMenu profile={profile} />
+          <div className="grid gap-4 sm:flex sm:items-start sm:justify-between">
+            <div className="grid min-w-0 gap-2">
+              <div className="flex items-start justify-between gap-3 sm:block">
+                <ProfileMenu profile={profile} />
+                <div className="flex items-center gap-2 sm:hidden">
+                  <LanguageMenu />
+                  <Link
+                    href="/settings"
+                    className="inline-flex size-11 items-center justify-center rounded-lg border border-white/80 bg-white/90 text-stone-800 shadow-sm transition hover:bg-white"
+                    aria-label={t("header.settings")}
+                    title={t("header.settings")}
+                  >
+                    <Settings aria-hidden="true" className="size-5" />
+                  </Link>
+                </div>
+              </div>
               <p className="text-sm font-bold uppercase tracking-wide text-stone-700">
                 {t("dashboard.brand")}
               </p>
-              <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+              <h1 className="max-w-3xl text-2xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
                 {t("dashboard.title")}
               </h1>
+              <PwaInstallButton />
             </div>
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="hidden flex-wrap items-center gap-2 sm:flex sm:justify-end">
               <LanguageMenu />
               <Link
                 href="/map"
@@ -93,6 +110,14 @@ export function DashboardClient({
                 title={t("header.map")}
               >
                 <MapPinned aria-hidden="true" className="size-5" />
+              </Link>
+              <Link
+                href="/friends"
+                className="hidden size-11 items-center justify-center rounded-lg border border-white/80 bg-white/90 text-stone-800 shadow-sm transition hover:bg-white sm:inline-flex"
+                aria-label="Friends"
+                title="Friends"
+              >
+                <Users aria-hidden="true" className="size-5" />
               </Link>
               <Link
                 href="/settings"
@@ -121,7 +146,7 @@ export function DashboardClient({
             />
           </Link>
 
-          <div className="grid gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard label={t("dashboard.restaurants")} value={restaurants.length} />
             <StatCard label={t("dashboard.logs")} value={visits.length} />
             <StatCard
@@ -138,7 +163,7 @@ export function DashboardClient({
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-5 sm:px-6 sm:py-6">
         <section className="grid gap-4 lg:grid-cols-2">
           <CompactWedge
             eyebrow={t("dashboard.archiveEyebrow")}
@@ -195,8 +220,8 @@ export function DashboardClient({
             </div>
           </CompactWedge>
         </section>
-
       </main>
+      <MobileBottomNav />
     </div>
   );
 }
@@ -213,7 +238,7 @@ function CompactWedge({
   children: ReactNode;
 }) {
   return (
-    <section className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+    <section className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="grid gap-1">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
           {eyebrow}
@@ -262,7 +287,7 @@ function RestaurantPreviewCard({
             <UserText
               as="p"
               text={restaurant.name}
-              className="truncate text-sm font-semibold"
+              className="line-clamp-2 text-sm font-semibold"
               translationClassName="truncate text-[11px] leading-4 text-white/75"
             />
             <p className="flex items-center gap-1 text-xs text-white/80">
@@ -387,7 +412,7 @@ function MoreTile({
           <MoreHorizontal aria-hidden="true" className="size-5" />
         </span>
         <div className="grid gap-1">
-          <span className="text-base font-semibold">{label}</span>
+          <span className="text-sm font-semibold sm:text-base">{label}</span>
           <span className="text-xs leading-5 text-white/70">{detail}</span>
         </div>
         <span className="inline-flex items-center justify-center gap-1 text-xs font-semibold text-white/80">
@@ -414,11 +439,11 @@ function StatCard({
   valueClassName?: string;
 }) {
   return (
-    <div className="rounded-lg border border-white/80 bg-white/90 p-4 shadow-sm">
+    <div className="rounded-lg border border-white/80 bg-white/90 p-3 shadow-sm sm:p-4">
       <p className="text-xs font-bold uppercase tracking-wide text-stone-500">
         {label}
       </p>
-      <p className={`mt-2 flex items-center gap-2 text-3xl font-bold ${valueClassName}`}>
+      <p className={`mt-2 flex items-center gap-2 text-2xl font-bold sm:text-3xl ${valueClassName}`}>
         {icon}
         {value}
       </p>

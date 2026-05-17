@@ -21,9 +21,9 @@ export default async function AddPage({ searchParams }: AddPageProps) {
     typeof fromTodo === "string" ? await getToEatItemById(fromTodo) : null;
 
   return (
-    <main className="min-h-screen bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
       <AppHeader />
-      <div className="mx-auto grid w-full max-w-4xl gap-6 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid w-full max-w-4xl gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-8">
         {!configured ? <ConfigNotice /> : null}
         <AddRecordClient
           configured={configured}

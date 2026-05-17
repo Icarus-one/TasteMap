@@ -11,9 +11,9 @@ export default async function ProfilePage() {
   const { configured, profile } = await getSessionContext({ protect: true });
 
   return (
-    <main className="min-h-screen bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
       <AppHeader />
-      <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid w-full max-w-3xl gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-8">
         {!configured ? <ConfigNotice /> : null}
         <section className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -21,7 +21,7 @@ export default async function ProfilePage() {
               <p className="text-sm font-semibold uppercase text-emerald-700">
                 <I18nText k="profile.eyebrow" />
               </p>
-              <h1 className="text-3xl font-bold text-stone-950">
+              <h1 className="text-2xl font-bold text-stone-950 sm:text-3xl">
                 <I18nText k="profile.title" />
               </h1>
               <p className="text-sm leading-6 text-stone-600">

@@ -18,7 +18,7 @@ export function ShareActionButton({
   urlPath,
   shareEndpoint,
   label = "Share",
-  className = "inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-800 transition hover:border-stone-300",
+  className = "inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-800 transition hover:border-stone-300 sm:w-auto",
 }: ShareActionButtonProps) {
   const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
 

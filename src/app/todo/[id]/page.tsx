@@ -43,9 +43,9 @@ export default async function TodoItemPage({ params }: TodoItemPageProps) {
   const shareText = buildToDoShareText(item);
 
   return (
-    <main className="min-h-screen bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
       <AppHeader />
-      <div className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid w-full max-w-5xl gap-5 px-4 py-5 sm:gap-8 sm:px-6 sm:py-8">
         <section className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
           {item.source_image_url ? (
             <div className="overflow-hidden rounded-lg border border-stone-200 bg-stone-100">
@@ -84,7 +84,7 @@ export default async function TodoItemPage({ params }: TodoItemPageProps) {
                 <UserText
                   as="h1"
                   text={item.title}
-                  className="text-3xl font-bold text-stone-950 sm:text-4xl"
+                  className="text-2xl font-bold text-stone-950 sm:text-4xl"
                   translationClassName="text-sm leading-6 text-stone-500"
                 />
                 {hasMeta ? (
@@ -113,7 +113,7 @@ export default async function TodoItemPage({ params }: TodoItemPageProps) {
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2 md:justify-end">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap md:justify-end">
               <ShareActionButton
                 title={item.title}
                 text={shareText}

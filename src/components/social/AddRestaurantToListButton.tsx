@@ -85,15 +85,15 @@ export function AddRestaurantToListButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 transition hover:border-stone-300 hover:bg-stone-50"
+        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 transition hover:border-stone-300 hover:bg-stone-50 sm:w-auto"
       >
         <ListPlus aria-hidden="true" className="size-4" />
         Add to list
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-stone-950/30 px-4">
-          <div className="grid w-full max-w-md gap-4 rounded-lg border border-stone-200 bg-white p-5 shadow-xl">
+        <div className="fixed inset-0 z-50 grid items-end bg-stone-950/30 px-3 pb-3 sm:place-items-center sm:px-4 sm:pb-0">
+          <div className="grid w-full max-w-md gap-4 rounded-lg border border-stone-200 bg-white p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-xl sm:p-5">
             <div>
               <p className="text-sm font-semibold uppercase text-emerald-700">
                 Shared wishlist
@@ -153,7 +153,7 @@ export function AddRestaurantToListButton({
               </p>
             ) : null}
 
-            <div className="flex justify-end gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
               <button
                 type="button"
                 onClick={() => {

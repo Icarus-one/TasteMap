@@ -8,14 +8,14 @@ export default async function FriendsPage() {
   const context = await getSessionContext({ protect: true });
 
   return (
-    <main className="min-h-screen bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
       <AppHeader />
-      <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-8">
         <section className="grid gap-2">
           <p className="text-sm font-semibold uppercase text-emerald-700">
             Trust network
           </p>
-          <h1 className="text-3xl font-bold text-stone-950 sm:text-4xl">
+          <h1 className="text-2xl font-bold text-stone-950 sm:text-4xl">
             Friends, shared lists, and trusted cards
           </h1>
           <p className="max-w-3xl text-sm leading-6 text-stone-600">
