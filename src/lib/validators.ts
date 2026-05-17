@@ -68,6 +68,7 @@ export const createVisitSchema = z.object({
   visit: z.object({
     visit_date: z.string().nullable().optional(),
     taken_at: z.string().nullable().optional(),
+    companions: z.string().max(240).nullable().optional(),
     average_price: z.number().min(0).nullable().optional(),
     total_score: z.number().min(0).max(5).multipleOf(0.5),
     will_revisit: revisitSchema,
@@ -171,6 +172,53 @@ export const profileInputSchema = z.object({
     .url()
     .max(1000)
     .or(z.literal(""))
+    .optional()
+    .transform((value) => value || null),
+});
+
+export const friendRequestSchema = z.object({
+  handle: profileHandleSchema,
+});
+
+export const friendActionSchema = z.object({
+  id: z.string().uuid(),
+  action: z.enum(["accept", "remove"]),
+});
+
+export const tasteListVisibilitySchema = z.enum([
+  "private",
+  "friends",
+  "public",
+]);
+
+export const createTasteListSchema = z.object({
+  title: z.string().trim().min(1).max(80),
+  description: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => value || null),
+  visibility: tasteListVisibilitySchema.default("friends"),
+});
+
+export const addTasteListItemSchema = z.object({
+  restaurant_id: z.string().uuid(),
+  note: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => value || null),
+});
+
+export const sendFriendCardSchema = z.object({
+  recipient_id: z.string().uuid(),
+  restaurant_id: z.string().uuid(),
+  note: z
+    .string()
+    .trim()
+    .max(240)
     .optional()
     .transform((value) => value || null),
 });

@@ -186,6 +186,59 @@ create table if not exists shared_restaurant_links (
   unique (user_id, restaurant_id)
 );
 
+create table if not exists friendships (
+  id uuid primary key default gen_random_uuid(),
+  requester_id uuid not null references auth.users(id) on delete cascade,
+  addressee_id uuid not null references auth.users(id) on delete cascade,
+  status text check (status in ('pending', 'accepted', 'blocked')) default 'pending',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  check (requester_id <> addressee_id)
+);
+
+create unique index if not exists friendships_pair_unique_idx
+  on friendships (
+    least(requester_id, addressee_id),
+    greatest(requester_id, addressee_id)
+  );
+
+create table if not exists taste_lists (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  visibility text check (visibility in ('private', 'friends', 'public')) default 'friends',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table if not exists taste_list_items (
+  id uuid primary key default gen_random_uuid(),
+  list_id uuid not null references taste_lists(id) on delete cascade,
+  added_by uuid not null references auth.users(id) on delete cascade,
+  restaurant_id uuid references restaurants(id) on delete set null,
+  visit_id uuid references visits(id) on delete set null,
+  item_title text not null,
+  item_city text,
+  item_address text,
+  note text,
+  created_at timestamptz default now()
+);
+
+create table if not exists friend_card_sends (
+  id uuid primary key default gen_random_uuid(),
+  sender_id uuid not null references auth.users(id) on delete cascade,
+  recipient_id uuid not null references auth.users(id) on delete cascade,
+  restaurant_id uuid references restaurants(id) on delete set null,
+  visit_id uuid references visits(id) on delete set null,
+  card_title text not null,
+  card_subtitle text,
+  note text,
+  seen_at timestamptz,
+  created_at timestamptz default now(),
+  check (sender_id <> recipient_id)
+);
+
 create index if not exists restaurants_user_provider_idx
   on restaurants (user_id, provider_place_id)
   where provider_place_id is not null;
@@ -201,3 +254,14 @@ create index if not exists place_candidates_user_visit_idx on place_candidates (
 create index if not exists to_eat_items_user_status_idx on to_eat_items (user_id, status, created_at desc);
 create index if not exists shared_restaurant_links_restaurant_idx
   on shared_restaurant_links (restaurant_id);
+create index if not exists friendships_requester_idx on friendships (requester_id, status);
+create index if not exists friendships_addressee_idx on friendships (addressee_id, status);
+create index if not exists taste_lists_user_visibility_idx on taste_lists (user_id, visibility, updated_at desc);
+create index if not exists taste_list_items_list_idx on taste_list_items (list_id, created_at desc);
+create index if not exists taste_list_items_added_by_idx on taste_list_items (added_by);
+create index if not exists taste_list_items_restaurant_idx on taste_list_items (restaurant_id);
+create index if not exists taste_list_items_visit_idx on taste_list_items (visit_id);
+create index if not exists friend_card_sends_recipient_idx on friend_card_sends (recipient_id, created_at desc);
+create index if not exists friend_card_sends_sender_idx on friend_card_sends (sender_id, created_at desc);
+create index if not exists friend_card_sends_restaurant_idx on friend_card_sends (restaurant_id);
+create index if not exists friend_card_sends_visit_idx on friend_card_sends (visit_id);

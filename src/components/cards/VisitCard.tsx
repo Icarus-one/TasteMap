@@ -1,8 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
-import { CalendarDays, Coins, ThumbsDown, ThumbsUp, Utensils } from "lucide-react";
-import { formatAveragePrice, formatDate } from "@/lib/format";
+import {
+  CalendarDays,
+  Coins,
+  MapPin,
+  ThumbsDown,
+  ThumbsUp,
+  Users,
+  Utensils,
+} from "lucide-react";
+import { compactAddress, formatAveragePrice, formatDate } from "@/lib/format";
+import { buildGoogleMapsSearchUrl } from "@/lib/maps";
 import type { VisitWithRelations } from "@/lib/types";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { UserText } from "@/components/i18n/UserText";
@@ -12,8 +21,20 @@ type VisitCardProps = {
 };
 
 export function VisitCard({ visit }: VisitCardProps) {
+  const restaurant = visit.restaurants;
   const dishes = visit.dishes?.map((dish) => dish.name).slice(0, 4) ?? [];
   const heroPhoto = visit.photos?.[0];
+  const locationLabel = compactAddress(
+    restaurant?.city ?? null,
+    restaurant?.address ?? null,
+  );
+  const mapsUrl = buildGoogleMapsSearchUrl({
+    name: restaurant?.name,
+    city: restaurant?.city,
+    address: restaurant?.address,
+    latitude: restaurant?.latitude,
+    longitude: restaurant?.longitude,
+  });
   const recommended = visit.dishes
     ?.filter((dish) => dish.is_recommended)
     .map((dish) => dish.name)
@@ -35,36 +56,57 @@ export function VisitCard({ visit }: VisitCardProps) {
   ).slice(0, 3);
 
   return (
-    <Link
-      href={`/visits/${visit.id}`}
-      className="grid overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md"
-    >
+    <article className="group relative grid overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md">
+      <Link
+        href={`/visits/${visit.id}`}
+        aria-label={`Open ${restaurant?.name ?? "visit"} log`}
+        className="absolute inset-0 z-0"
+      />
       {heroPhoto?.display_url || heroPhoto?.public_url ? (
         <img
           src={heroPhoto.display_url ?? heroPhoto.public_url ?? ""}
-          alt={visit.restaurants?.name ?? "Visit photo"}
-          className="aspect-[16/9] h-full w-full object-cover"
+          alt={restaurant?.name ?? "Visit photo"}
+          className="pointer-events-none relative z-10 aspect-[16/9] h-full w-full object-cover"
         />
       ) : null}
-      <div className="grid gap-4 p-4">
+      <div className="pointer-events-none relative z-10 grid gap-4 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="grid gap-1">
             <UserText
               as="h3"
-              text={visit.restaurants?.name ?? "Unknown restaurant"}
+              text={restaurant?.name ?? "Unknown restaurant"}
               className="font-bold text-stone-950"
             />
             <p className="flex items-center gap-1 text-sm text-stone-500">
               <CalendarDays aria-hidden="true" className="size-4" />
               {formatDate(visit.visit_date ?? visit.taken_at)}
             </p>
+            {mapsUrl ? (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="pointer-events-auto relative z-20 flex w-fit items-center gap-1 rounded-lg text-sm font-semibold text-stone-600 underline-offset-4 transition hover:text-emerald-700 hover:underline"
+                aria-label={`Open ${restaurant?.name ?? "this restaurant"} in Google Maps`}
+                title="Open in Google Maps"
+              >
+                <MapPin aria-hidden="true" className="size-4" />
+                <span className="line-clamp-1">{locationLabel}</span>
+              </a>
+            ) : null}
             {visit.average_price !== null && visit.average_price !== undefined ? (
               <p className="flex items-center gap-1 text-sm text-stone-500">
                 <Coins aria-hidden="true" className="size-4" />
                 {formatAveragePrice(
                   visit.average_price,
-                  visit.restaurants?.currency ?? "GBP",
+                  restaurant?.currency ?? "GBP",
                 )}
+              </p>
+            ) : null}
+            {visit.companions ? (
+              <p className="flex items-center gap-1 text-sm text-stone-500">
+                <Users aria-hidden="true" className="size-4" />
+                <span className="line-clamp-1">{visit.companions}</span>
               </p>
             ) : null}
           </div>
@@ -109,6 +151,6 @@ export function VisitCard({ visit }: VisitCardProps) {
           />
         ) : null}
       </div>
-    </Link>
+    </article>
   );
 }

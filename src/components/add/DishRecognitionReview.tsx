@@ -52,7 +52,8 @@ export function DishRecognitionReview({
         <div className="grid gap-1">
           <h2 className="text-xl font-bold text-stone-950">Confirm dishes</h2>
           <p className="text-sm leading-6 text-stone-600">
-            Keep the useful guesses, edit the names, or add what was missed.
+            Mark what tasted good, what to skip next time, and add any dish the
+            photo missed.
           </p>
         </div>
         <button

@@ -9,6 +9,7 @@ import {
   LocateFixed,
   MapPin,
   Tags,
+  Users,
   Utensils,
 } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -199,6 +200,13 @@ function VisitFacts({ visit }: { visit: VisitWithRelations }) {
         label="Location source"
         value={`${visit.location_source} / ${visit.location_confidence}`}
       />
+      {visit.companions ? (
+        <Fact
+          icon={<Users aria-hidden="true" className="size-4" />}
+          label="With"
+          value={visit.companions}
+        />
+      ) : null}
       <Fact
         icon={<Bot aria-hidden="true" className="size-4" />}
         label="AI generated"

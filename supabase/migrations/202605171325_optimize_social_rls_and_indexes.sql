@@ -1,16 +1,8 @@
-alter table profiles enable row level security;
-alter table restaurants enable row level security;
-alter table restaurant_aliases enable row level security;
-alter table visits enable row level security;
-alter table dishes enable row level security;
-alter table photos enable row level security;
-alter table place_candidates enable row level security;
-alter table to_eat_items enable row level security;
-alter table shared_restaurant_links enable row level security;
-alter table friendships enable row level security;
-alter table taste_lists enable row level security;
-alter table taste_list_items enable row level security;
-alter table friend_card_sends enable row level security;
+create index if not exists taste_list_items_added_by_idx on taste_list_items (added_by);
+create index if not exists taste_list_items_restaurant_idx on taste_list_items (restaurant_id);
+create index if not exists taste_list_items_visit_idx on taste_list_items (visit_id);
+create index if not exists friend_card_sends_restaurant_idx on friend_card_sends (restaurant_id);
+create index if not exists friend_card_sends_visit_idx on friend_card_sends (visit_id);
 
 grant usage on schema public to authenticated;
 grant select on profiles to authenticated;

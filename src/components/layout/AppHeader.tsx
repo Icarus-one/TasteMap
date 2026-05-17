@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Settings, Users } from "lucide-react";
 import { I18nText } from "@/components/i18n/I18nText";
 import { BackButton } from "@/components/layout/BackButton";
 import { LanguageMenu } from "@/components/layout/LanguageMenu";
@@ -33,17 +33,28 @@ export async function AppHeader({
           <LanguageMenu />
           {showAuthActions ? (
             actions ?? (
-              <Link
-                href="/settings"
-                aria-label="Settings"
-                className="inline-flex size-10 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
-                title="Settings"
-              >
-                <Settings aria-hidden="true" className="size-4" />
-                <span className="sr-only">
-                  <I18nText k="header.settings" />
-                </span>
-              </Link>
+              <>
+                <Link
+                  href="/friends"
+                  aria-label="Friends"
+                  className="inline-flex size-10 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
+                  title="Friends"
+                >
+                  <Users aria-hidden="true" className="size-4" />
+                  <span className="sr-only">Friends</span>
+                </Link>
+                <Link
+                  href="/settings"
+                  aria-label="Settings"
+                  className="inline-flex size-10 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
+                  title="Settings"
+                >
+                  <Settings aria-hidden="true" className="size-4" />
+                  <span className="sr-only">
+                    <I18nText k="header.settings" />
+                  </span>
+                </Link>
+              </>
             )
           ) : null}
         </nav>

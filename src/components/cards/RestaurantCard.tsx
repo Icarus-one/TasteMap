@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Coins, MapPin, Sparkles } from "lucide-react";
 import { compactAddress, formatAveragePrice, formatDate } from "@/lib/format";
+import { buildGoogleMapsSearchUrl } from "@/lib/maps";
 import { getWeightedRestaurantScore } from "@/lib/scoring";
 import type { RestaurantWithRelations } from "@/lib/types";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
@@ -27,13 +28,17 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
     .map((dish) => dish.name)
     .slice(0, 3);
   const tags = buildRestaurantTags(restaurant);
+  const locationLabel = compactAddress(restaurant.city, restaurant.address);
+  const mapsUrl = buildGoogleMapsSearchUrl(restaurant);
 
   return (
-    <Link
-      href={`/restaurants/${restaurant.id}`}
-      className="grid overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md"
-    >
-      <div className="aspect-[16/9] bg-stone-100">
+    <article className="group relative grid overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md">
+      <Link
+        href={`/restaurants/${restaurant.id}`}
+        aria-label={`Open ${restaurant.name}`}
+        className="absolute inset-0 z-0"
+      />
+      <div className="pointer-events-none relative z-10 aspect-[16/9] bg-stone-100">
         {heroPhoto?.display_url || heroPhoto?.public_url ? (
           <img
             src={heroPhoto.display_url ?? heroPhoto.public_url ?? ""}
@@ -46,7 +51,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           </div>
         )}
       </div>
-      <div className="grid gap-4 p-4">
+      <div className="pointer-events-none relative z-10 grid gap-4 p-4">
         <div className="grid gap-1">
           <div className="flex items-start justify-between gap-3">
             <UserText
@@ -56,10 +61,19 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
             />
             <ScoreBadge score={weightedScore} label="Stars" />
           </div>
-          <p className="flex items-center gap-1 text-sm text-stone-500">
-            <MapPin aria-hidden="true" className="size-4" />
-            {compactAddress(restaurant.city, restaurant.address)}
-          </p>
+          {mapsUrl ? (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="pointer-events-auto relative z-20 flex w-fit items-center gap-1 rounded-lg text-sm font-semibold text-stone-600 underline-offset-4 transition hover:text-emerald-700 hover:underline"
+              aria-label={`Open ${restaurant.name} in Google Maps`}
+              title="Open in Google Maps"
+            >
+              <MapPin aria-hidden="true" className="size-4" />
+              <span className="line-clamp-1">{locationLabel}</span>
+            </a>
+          ) : null}
           {latestVisit ? (
             <div className="flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-wide text-stone-400">
               <span>
@@ -111,7 +125,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           </p>
         ) : null}
       </div>
-    </Link>
+    </article>
   );
 }
 

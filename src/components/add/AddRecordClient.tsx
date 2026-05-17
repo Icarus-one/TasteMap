@@ -96,6 +96,7 @@ export function AddRecordClient({
     useState<RestaurantDraft>(() => getPrefilledRestaurant(prefillToDoItem));
   const [dishes, setDishes] = useState<EditableDish[]>([]);
   const [stars, setStars] = useState(4.0);
+  const [companions, setCompanions] = useState("");
   const [averagePrice, setAveragePrice] = useState("");
   const [summary, setSummary] = useState(() => prefillToDoItem?.note ?? "");
   const [tags, setTags] = useState<string[]>(() => prefillToDoItem?.tags ?? []);
@@ -197,6 +198,7 @@ export function AddRecordClient({
     setArchiveMatches([]);
     setRestaurant(getPrefilledRestaurant(prefillToDoItem));
     setDishes([]);
+    setCompanions("");
     setAveragePrice("");
     setSummary(prefillToDoItem?.note ?? "");
     setTags(prefillToDoItem?.tags ?? []);
@@ -488,6 +490,7 @@ export function AddRecordClient({
           visit: {
             visit_date: toDateOnly(firstTakenAt ?? new Date().toISOString()),
             taken_at: firstTakenAt,
+            companions: emptyToNull(companions),
             average_price: parseOptionalNumber(averagePrice),
             total_score: stars,
             will_revisit: revisitFromStars(stars),
@@ -659,11 +662,13 @@ export function AddRecordClient({
 
         <QuickRatingForm
           stars={stars}
+          companions={companions}
           averagePrice={averagePrice}
           availableTags={availableTags}
           summary={summary}
           tags={tags}
           onStarsChange={setStars}
+          onCompanionsChange={setCompanions}
           onAveragePriceChange={setAveragePrice}
           onSummaryChange={setSummary}
           onTagsChange={setTags}

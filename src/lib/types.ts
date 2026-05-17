@@ -15,6 +15,8 @@ export type RecommendationPlatform =
   | "web"
   | "manual";
 export type ToEatStatus = "to_eat" | "booked" | "visited" | "archived";
+export type FriendshipStatus = "pending" | "accepted" | "blocked";
+export type TasteListVisibility = "private" | "friends" | "public";
 
 export type AddRecordState =
   | "idle"
@@ -128,6 +130,61 @@ export type Profile = {
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type Friendship = {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: FriendshipStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TasteList = {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  visibility: TasteListVisibility;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TasteListItem = {
+  id: string;
+  list_id: string;
+  added_by: string;
+  restaurant_id: string | null;
+  visit_id: string | null;
+  item_title: string;
+  item_city: string | null;
+  item_address: string | null;
+  note: string | null;
+  created_at: string;
+};
+
+export type FriendCardSend = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  restaurant_id: string | null;
+  visit_id: string | null;
+  card_title: string;
+  card_subtitle: string | null;
+  note: string | null;
+  seen_at: string | null;
+  created_at: string;
+};
+
+export type TasteListWithRelations = TasteList & {
+  profiles?: Profile | null;
+  taste_list_items?: TasteListItem[];
+};
+
+export type FriendCardSendWithProfiles = FriendCardSend & {
+  sender?: Profile | null;
+  recipient?: Profile | null;
 };
 
 export type ToEatItem = {

@@ -59,6 +59,7 @@ export function buildVisitShareText(visit: VisitWithRelations) {
           visit.restaurants?.currency ?? "GBP",
         )}`
       : null,
+    visit.companions ? `With: ${visit.companions}` : null,
     dishes.length > 0 ? `Dishes: ${dishes.join(", ")}` : null,
     recommended.length > 0 ? `Worth ordering: ${recommended.join(", ")}` : null,
     skipped.length > 0 ? `Skip next time: ${skipped.join(", ")}` : null,

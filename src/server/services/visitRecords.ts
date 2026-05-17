@@ -42,6 +42,7 @@ export async function createVisitFromPhotoRecord({
       restaurant_id: restaurantResult.restaurantId,
       visit_date: input.visit.visit_date ?? null,
       taken_at: input.visit.taken_at ?? null,
+      companions: input.visit.companions ?? null,
       average_price: input.visit.average_price ?? null,
       total_score: input.visit.total_score,
       will_revisit: input.visit.will_revisit,

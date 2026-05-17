@@ -6,11 +6,13 @@ import { useI18n } from "@/lib/i18n";
 
 type QuickRatingFormProps = {
   stars: number;
+  companions: string;
   averagePrice: string;
   availableTags: string[];
   summary: string;
   tags: string[];
   onStarsChange: (stars: number) => void;
+  onCompanionsChange: (value: string) => void;
   onAveragePriceChange: (value: string) => void;
   onSummaryChange: (value: string) => void;
   onTagsChange: (tags: string[]) => void;
@@ -18,11 +20,13 @@ type QuickRatingFormProps = {
 
 export function QuickRatingForm({
   stars,
+  companions,
   averagePrice,
   availableTags,
   summary,
   tags,
   onStarsChange,
+  onCompanionsChange,
   onAveragePriceChange,
   onSummaryChange,
   onTagsChange,
@@ -114,6 +118,18 @@ export function QuickRatingForm({
                     : t("rating.rough")}
           </p>
         </div>
+
+        <label className="grid gap-2 text-sm font-semibold text-stone-700">
+          {t("rating.companions")}
+          <input
+            type="text"
+            value={companions}
+            onChange={(event) => onCompanionsChange(event.target.value)}
+            maxLength={240}
+            className="h-11 rounded-lg border border-stone-200 px-3 font-normal outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
+            placeholder={t("rating.companionsPlaceholder")}
+          />
+        </label>
 
         <label className="grid gap-2 text-sm font-semibold text-stone-700">
           {t("rating.spend")}

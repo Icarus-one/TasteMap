@@ -12,6 +12,8 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { PhotoGallery } from "@/components/detail/PhotoGallery";
 import { RestaurantCardActionsMenu } from "@/components/detail/RestaurantCardActionsMenu";
 import { ShareActionButton } from "@/components/share/ShareActionButton";
+import { AddRestaurantToListButton } from "@/components/social/AddRestaurantToListButton";
+import { SendRestaurantToFriendButton } from "@/components/social/SendRestaurantToFriendButton";
 import { UserText } from "@/components/i18n/UserText";
 import { VisitCard } from "@/components/cards/VisitCard";
 import { RestaurantLocationMap } from "@/components/map/RestaurantLocationMap";
@@ -102,6 +104,14 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2 md:justify-end">
+              <AddRestaurantToListButton
+                restaurantId={restaurant.id}
+                restaurantName={restaurant.name}
+              />
+              <SendRestaurantToFriendButton
+                restaurantId={restaurant.id}
+                restaurantName={restaurant.name}
+              />
               <ShareActionButton
                 title={restaurant.name}
                 text={shareText}

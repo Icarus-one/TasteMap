@@ -44,7 +44,7 @@ export async function createLocalVisitFromPhotoRecord(input: CreateVisitInput) {
     restaurant_id: restaurant.id,
     visit_date: input.visit.visit_date ?? null,
     taken_at: input.visit.taken_at ?? null,
-    companions: null,
+    companions: input.visit.companions ?? null,
     average_price: input.visit.average_price ?? null,
     total_score: input.visit.total_score,
     taste_score: null,
