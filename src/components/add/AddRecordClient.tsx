@@ -193,20 +193,21 @@ export function AddRecordClient({
   ]);
 
   async function handleFilesSelected(files: File[]) {
+    const existingPhotos = photos;
+    const isFirstBatch = existingPhotos.length === 0;
+
     setError(null);
-    setCandidates([]);
-    setArchiveMatches([]);
-    setRestaurant(getPrefilledRestaurant(prefillToDoItem));
-    setDishes([]);
-    setCompanions("");
-    setAveragePrice("");
-    setSummary(prefillToDoItem?.note ?? "");
-    setTags(prefillToDoItem?.tags ?? []);
-    photos.forEach((photo) => {
-      URL.revokeObjectURL(photo.previewUrl);
-      previewUrlsRef.current.delete(photo.previewUrl);
-    });
-    setPhotos([]);
+    if (isFirstBatch) {
+      setCandidates([]);
+      setArchiveMatches([]);
+      setRestaurant(getPrefilledRestaurant(prefillToDoItem));
+      setDishes([]);
+      setCompanions("");
+      setAveragePrice("");
+      setSummary(prefillToDoItem?.note ?? "");
+      setTags(prefillToDoItem?.tags ?? []);
+      setPhotos([]);
+    }
 
     setState("reading_metadata");
     setStatusText("Reading EXIF time and GPS from the photo.");
@@ -254,14 +255,23 @@ export function AddRecordClient({
         return photo;
       });
 
-      setPhotos(locatedPhotos);
+      const locatedCombinedPhotos = applyPhotoRoles([
+        ...existingPhotos,
+        ...locatedPhotos,
+      ]);
+      setPhotos(locatedCombinedPhotos);
 
-      let preparedForAnalysis = locatedPhotos;
+      let newPhotosForAnalysis = locatedPhotos;
+      let preparedForAnalysis = locatedCombinedPhotos;
 
       if (canUploadToSupabase) {
         setState("uploading_photo");
         setStatusText("Uploading photos to your private food-photos bucket.");
-        preparedForAnalysis = await uploadPhotos(locatedPhotos);
+        newPhotosForAnalysis = await uploadPhotos(locatedPhotos);
+        preparedForAnalysis = applyPhotoRoles([
+          ...existingPhotos,
+          ...newPhotosForAnalysis,
+        ]);
         setPhotos(preparedForAnalysis);
       } else {
         setStatusText(
@@ -275,9 +285,17 @@ export function AddRecordClient({
           ? "Treating the first photo as the restaurant shot and using the rest for dish guesses."
           : "Asking AI for editable dish guesses.",
       );
-      const analyzedPhotos = await analyzePhotos(preparedForAnalysis);
+      const analyzedNewPhotos = await analyzePhotos(
+        newPhotosForAnalysis,
+        existingPhotos.length,
+        preparedForAnalysis.length,
+      );
+      const analyzedPhotos = applyPhotoRoles([
+        ...existingPhotos,
+        ...analyzedNewPhotos,
+      ]);
       setPhotos(analyzedPhotos);
-      setDishes(mergeDetectedDishes(analyzedPhotos));
+      setDishes((current) => mergeDetectedDishes(analyzedPhotos, current));
 
       const location = getPrimaryLocation(analyzedPhotos);
       if (location) {
@@ -356,7 +374,11 @@ export function AddRecordClient({
     );
   }
 
-  async function analyzePhotos(items: UploadedPhoto[]) {
+  async function analyzePhotos(
+    items: UploadedPhoto[],
+    startIndex = 0,
+    total = items.length,
+  ) {
     return Promise.all(
       items.map(async (photo, index) => {
         if (!photo.file) return photo;
@@ -375,10 +397,11 @@ export function AddRecordClient({
           }),
         });
         const payload = (await response.json()) as AnalyzePhotoResponse;
-        const normalized = normalizeAnalysis(payload, photo, index);
+        const photoIndex = startIndex + index;
+        const normalized = normalizeAnalysis(payload, photo, photoIndex);
         return {
           ...photo,
-          aiAnalysis: applyPhotoRole(normalized, index, items.length),
+          aiAnalysis: applyPhotoRole(normalized, photoIndex, total),
         };
       }),
     );
@@ -739,23 +762,43 @@ function normalizeAnalysis(
   };
 }
 
-function mergeDetectedDishes(photos: UploadedPhoto[]): EditableDish[] {
+function mergeDetectedDishes(
+  photos: UploadedPhoto[],
+  existingDishes: EditableDish[] = [],
+): EditableDish[] {
   const map = new Map<string, EditableDish>();
+  const existingByKey = new Map(
+    existingDishes
+      .map((dish) => [dish.name.trim().toLowerCase(), dish] as const)
+      .filter(([key]) => key.length > 0),
+  );
 
   photos.forEach((photo) => {
     if (photo.aiAnalysis?.photoType === "restaurant") return;
     photo.aiAnalysis?.detectedDishes.forEach((dish) => {
       const key = dish.name.trim().toLowerCase();
       if (!key || map.has(key)) return;
+      const existing = existingByKey.get(key);
       map.set(key, {
         ...dish,
-        isRecommended: false,
-        isBad: false,
+        name: existing?.name ?? dish.name,
+        isRecommended: existing?.isRecommended ?? false,
+        isBad: existing?.isBad ?? false,
       });
     });
   });
 
   return Array.from(map.values());
+}
+
+function applyPhotoRoles(photos: UploadedPhoto[]): UploadedPhoto[] {
+  return photos.map((photo, index) => {
+    if (!photo.aiAnalysis) return photo;
+    return {
+      ...photo,
+      aiAnalysis: applyPhotoRole(photo.aiAnalysis, index, photos.length),
+    };
+  });
 }
 
 function applyPhotoRole(
