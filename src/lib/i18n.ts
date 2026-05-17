@@ -199,6 +199,11 @@ const messages = {
     "add.saveLocal": "Save into local archive",
     "add.saveFailed": "Save failed",
     "add.dismiss": "Dismiss",
+    "photoUpload.title": "Add food photos first",
+    "photoUpload.description":
+      "Take a photo or choose images from your album. You can still drag photos here on desktop.",
+    "photoUpload.takePhoto": "Take photo",
+    "photoUpload.chooseAlbum": "Upload from album",
 
     "restaurant.confirm.title": "Confirm restaurant",
     "restaurant.confirm.subtitle": "Pick the closest match or keep it manual.",
@@ -433,6 +438,10 @@ const messages = {
     "add.saveLocal": "保存到本地归档",
     "add.saveFailed": "保存失败",
     "add.dismiss": "关闭",
+    "photoUpload.title": "先添加美食照片",
+    "photoUpload.description": "可以拍照，也可以从系统相册选择照片。电脑端仍可拖拽图片到这里。",
+    "photoUpload.takePhoto": "拍照",
+    "photoUpload.chooseAlbum": "系统相册上传照片",
 
     "restaurant.confirm.title": "确认餐厅",
     "restaurant.confirm.subtitle": "选择最接近的匹配，或继续手动填写。",
@@ -683,6 +692,11 @@ const messages = {
     "add.saveLocal": "Enregistrer en local",
     "add.saveFailed": "Échec de l'enregistrement",
     "add.dismiss": "Fermer",
+    "photoUpload.title": "Ajoutez d'abord des photos",
+    "photoUpload.description":
+      "Prenez une photo ou choisissez des images dans votre album. Sur ordinateur, vous pouvez aussi les glisser ici.",
+    "photoUpload.takePhoto": "Prendre une photo",
+    "photoUpload.chooseAlbum": "Importer depuis l'album",
 
     "restaurant.confirm.title": "Confirmer le restaurant",
     "restaurant.confirm.subtitle": "Choisissez la meilleure correspondance ou gardez une saisie manuelle.",
