@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { ensureProfileFromUser, isProfileComplete } from "@/lib/profile";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const tokenHash = requestUrl.searchParams.get("token_hash");
+  const type = requestUrl.searchParams.get("type") as EmailOtpType | null;
   const error = requestUrl.searchParams.get("error");
   const errorDescription =
     requestUrl.searchParams.get("error_description") ??
     requestUrl.searchParams.get("message");
-  const next = sanitizeNextPath(requestUrl.searchParams.get("next") || "/");
+  const next = sanitizeNextPath(
+    requestUrl.searchParams.get("next") ||
+      (type === "recovery" ? "/auth/reset-password" : "/"),
+  );
   const supabase = await createSupabaseServerClient();
 
   if (error) {
@@ -19,11 +25,18 @@ export async function GET(request: Request) {
     );
   }
 
-  if (!code || !supabase) {
+  if (!supabase) {
     return redirectToAuthError(requestUrl, "The sign-in link is missing an auth code.");
   }
 
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  const { error: exchangeError } = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : tokenHash && type
+      ? await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type,
+        })
+      : { error: new Error("The sign-in link is missing an auth code.") };
 
   if (exchangeError) {
     return redirectToAuthError(requestUrl, exchangeError.message);

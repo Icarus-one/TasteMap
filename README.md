@@ -282,7 +282,9 @@ For auth callback support, make sure Supabase includes:
 
 ```text
 http://localhost:3000/auth/callback
+http://localhost:3000/auth/confirm
 https://your-domain.com/auth/callback
+https://your-domain.com/auth/confirm
 ```
 
 ### Supabase Auth checklist
@@ -293,7 +295,9 @@ In Supabase, open `Authentication -> URL Configuration` and set:
 Site URL: https://your-domain.com
 Redirect URLs:
   http://localhost:3000/auth/callback
+  http://localhost:3000/auth/confirm
   https://your-domain.com/auth/callback
+  https://your-domain.com/auth/confirm
 ```
 
 For social login, enable each provider in `Authentication -> Providers`.
@@ -306,6 +310,18 @@ https://<your-project-ref>.supabase.co/auth/v1/callback
 
 TasteMap then receives the final app callback at `/auth/callback`, exchanges the
 code for a session, and sends the user through `/auth/confirmed` or `/auth/error`.
+
+For password recovery in Supabase SSR mode, update the **Reset Password** email
+template to send the token hash through TasteMap before showing the new-password
+form:
+
+```html
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/auth/reset-password
+```
+
+If you keep the default Supabase verification URL instead, make sure the
+`redirect_to` destination is allow-listed; otherwise Supabase falls back to the
+Site URL and users land on the normal login/home flow instead of the reset form.
 
 ## Current status
 
