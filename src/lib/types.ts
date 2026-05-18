@@ -58,6 +58,7 @@ export type UploadedPhoto = {
   id: string;
   file?: File;
   previewUrl: string;
+  intendedPhotoType?: Extract<PhotoType, "restaurant" | "dish">;
   storagePath?: string;
   publicUrl?: string | null;
   takenAt?: string | null;

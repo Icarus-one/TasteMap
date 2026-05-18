@@ -47,6 +47,8 @@ type AddRecordClientProps = {
   } | null;
 };
 
+type UploadPhotoType = Extract<PhotoType, "restaurant" | "dish">;
+
 type AnalyzePhotoResponse = {
   photo_type?: PhotoType;
   detected_dishes?: {
@@ -192,7 +194,7 @@ export function AddRecordClient({
     restaurant.provider_place_id,
   ]);
 
-  async function handleFilesSelected(files: File[]) {
+  async function handleFilesSelected(files: File[], intendedPhotoType: UploadPhotoType) {
     const existingPhotos = photos;
     const isFirstBatch = existingPhotos.length === 0;
 
@@ -223,6 +225,7 @@ export function AddRecordClient({
             id: createId(),
             file,
             previewUrl,
+            intendedPhotoType,
             takenAt: metadata.takenAt,
             exifLatitude: metadata.latitude,
             exifLongitude: metadata.longitude,
@@ -280,11 +283,7 @@ export function AddRecordClient({
       }
 
       setState("analyzing_photo");
-      setStatusText(
-        preparedForAnalysis.length > 1
-          ? "Treating the first photo as the restaurant shot and using the rest for dish guesses."
-          : "Asking AI for editable dish guesses.",
-      );
+      setStatusText("Analyzing restaurant and dish photos separately.");
       const analyzedNewPhotos = await analyzePhotos(
         newPhotosForAnalysis,
         existingPhotos.length,
@@ -401,7 +400,7 @@ export function AddRecordClient({
         const normalized = normalizeAnalysis(payload, photo, photoIndex);
         return {
           ...photo,
-          aiAnalysis: applyPhotoRole(normalized, photoIndex, total),
+          aiAnalysis: applyPhotoRole(normalized, photo, photoIndex, total),
         };
       }),
     );
@@ -641,7 +640,18 @@ export function AddRecordClient({
         ) : null}
       </section>
 
-      <PhotoUploadDropzone disabled={isWorking} onFilesSelected={handleFilesSelected} />
+      <div className="grid gap-3 md:grid-cols-2">
+        <PhotoUploadDropzone
+          kind="restaurant"
+          disabled={isWorking}
+          onFilesSelected={handleFilesSelected}
+        />
+        <PhotoUploadDropzone
+          kind="dish"
+          disabled={isWorking}
+          onFilesSelected={handleFilesSelected}
+        />
+      </div>
       <PhotoPreviewGrid photos={photos} onRemove={!isWorking ? removePhoto : undefined} />
 
       <div className="grid gap-6 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
@@ -753,7 +763,14 @@ function normalizeAnalysis(
       userConfirmed: Boolean(dish.name_guess),
       sourcePhotoId: photo.id,
       sourcePhotoPreviewUrl: photo.previewUrl,
-      sourcePhotoLabel: index === 0 ? "Restaurant photo" : `Dish photo ${index}`,
+      sourcePhotoLabel:
+        photo.intendedPhotoType === "restaurant"
+          ? "Restaurant photo"
+          : photo.intendedPhotoType === "dish"
+            ? "Dish photo"
+            : index === 0
+              ? "Restaurant photo"
+              : `Dish photo ${index}`,
     })),
     suggestedTags: payload.suggested_tags ?? [],
     summaryGuess: payload.summary_guess ?? null,
@@ -796,16 +813,33 @@ function applyPhotoRoles(photos: UploadedPhoto[]): UploadedPhoto[] {
     if (!photo.aiAnalysis) return photo;
     return {
       ...photo,
-      aiAnalysis: applyPhotoRole(photo.aiAnalysis, index, photos.length),
+      aiAnalysis: applyPhotoRole(photo.aiAnalysis, photo, index, photos.length),
     };
   });
 }
 
 function applyPhotoRole(
   analysis: PhotoAIAnalysis,
+  photo: UploadedPhoto,
   index: number,
   total: number,
 ): PhotoAIAnalysis {
+  if (photo.intendedPhotoType === "restaurant") {
+    return {
+      ...analysis,
+      photoType: "restaurant",
+      detectedDishes: [],
+      suggestedTags: Array.from(new Set(["restaurant", ...analysis.suggestedTags])),
+    };
+  }
+
+  if (photo.intendedPhotoType === "dish") {
+    return {
+      ...analysis,
+      photoType: "dish",
+    };
+  }
+
   if (total <= 1) return analysis;
 
   if (index === 0) {

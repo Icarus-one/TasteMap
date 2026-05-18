@@ -194,16 +194,20 @@ const messages = {
     "add.editor.eyebrow": "Unified editor",
     "add.editor.title": "One pass to save this restaurant log",
     "add.editor.subtitle":
-      "Photos are optional. If you add more than one, we treat the first as the restaurant shot and use the rest to detect dishes. You can also save with just a restaurant name, stars, and a short note.",
+      "Photos are optional. Add place-identifying photos under restaurant photos and food close-ups under dish photos. You can also save with just a restaurant name, stars, and a short note.",
     "add.savePrivate": "Save private record",
     "add.saveLocal": "Save into local archive",
     "add.saveFailed": "Save failed",
     "add.dismiss": "Dismiss",
-    "photoUpload.title": "Add food photos first",
-    "photoUpload.description":
-      "Take a photo or choose images from your album. You can still drag photos here on desktop.",
-    "photoUpload.takePhoto": "Take photo",
-    "photoUpload.chooseAlbum": "Upload from album",
+    "photoUpload.restaurantTitle": "Restaurant photos",
+    "photoUpload.restaurantDescription":
+      "Use this for storefronts, menus, receipts, or anything that identifies the place.",
+    "photoUpload.dishTitle": "Dish photos",
+    "photoUpload.dishDescription":
+      "Use this for the food you want TasteMap to detect and turn into dish notes.",
+    "photoUpload.upload": "Upload",
+    "photoUpload.restaurantBadge": "Restaurant photo",
+    "photoUpload.dishBadge": "Dish photo",
 
     "restaurant.confirm.title": "Confirm restaurant",
     "restaurant.confirm.subtitle": "Pick the closest match or keep it manual.",
@@ -433,15 +437,18 @@ const messages = {
     "add.editor.eyebrow": "统一编辑器",
     "add.editor.title": "一次完成这条餐厅记录",
     "add.editor.subtitle":
-      "照片是可选的。上传多张照片时，第一张会作为餐厅照片，其余用于识别菜品。你也可以只填写餐厅名、评分和简短备注来保存。",
+      "照片是可选的。能帮助确认餐厅的照片放在餐厅照片里，食物特写放在菜品照片里。你也可以只填写餐厅名、评分和简短备注来保存。",
     "add.savePrivate": "保存私人记录",
     "add.saveLocal": "保存到本地归档",
     "add.saveFailed": "保存失败",
     "add.dismiss": "关闭",
-    "photoUpload.title": "先添加美食照片",
-    "photoUpload.description": "可以拍照，也可以从系统相册选择照片。电脑端仍可拖拽图片到这里。",
-    "photoUpload.takePhoto": "拍照",
-    "photoUpload.chooseAlbum": "系统相册上传照片",
+    "photoUpload.restaurantTitle": "餐厅照片",
+    "photoUpload.restaurantDescription": "上传门头、菜单、收据，或任何能帮助确认餐厅的照片。",
+    "photoUpload.dishTitle": "菜品照片",
+    "photoUpload.dishDescription": "上传要识别成菜品记录的食物照片。",
+    "photoUpload.upload": "上传",
+    "photoUpload.restaurantBadge": "餐厅照片",
+    "photoUpload.dishBadge": "菜品照片",
 
     "restaurant.confirm.title": "确认餐厅",
     "restaurant.confirm.subtitle": "选择最接近的匹配，或继续手动填写。",
@@ -687,16 +694,20 @@ const messages = {
     "add.editor.eyebrow": "Éditeur unifié",
     "add.editor.title": "Enregistrer cette note en une seule passe",
     "add.editor.subtitle":
-      "Les photos sont facultatives. Avec plusieurs photos, la première sert de photo du restaurant et les autres aident à détecter les plats. Vous pouvez aussi enregistrer seulement un nom, une note et un court commentaire.",
+      "Les photos sont facultatives. Ajoutez les photos qui identifient le lieu côté restaurant et les plats côté photos des plats. Vous pouvez aussi enregistrer seulement un nom, une note et un court commentaire.",
     "add.savePrivate": "Enregistrer en privé",
     "add.saveLocal": "Enregistrer en local",
     "add.saveFailed": "Échec de l'enregistrement",
     "add.dismiss": "Fermer",
-    "photoUpload.title": "Ajoutez d'abord des photos",
-    "photoUpload.description":
-      "Prenez une photo ou choisissez des images dans votre album. Sur ordinateur, vous pouvez aussi les glisser ici.",
-    "photoUpload.takePhoto": "Prendre une photo",
-    "photoUpload.chooseAlbum": "Importer depuis l'album",
+    "photoUpload.restaurantTitle": "Photos du restaurant",
+    "photoUpload.restaurantDescription":
+      "Ajoutez une devanture, un menu, un reçu ou toute photo qui identifie le lieu.",
+    "photoUpload.dishTitle": "Photos des plats",
+    "photoUpload.dishDescription":
+      "Ajoutez les plats que TasteMap doit détecter et transformer en notes.",
+    "photoUpload.upload": "Importer",
+    "photoUpload.restaurantBadge": "Photo restaurant",
+    "photoUpload.dishBadge": "Photo plat",
 
     "restaurant.confirm.title": "Confirmer le restaurant",
     "restaurant.confirm.subtitle": "Choisissez la meilleure correspondance ou gardez une saisie manuelle.",

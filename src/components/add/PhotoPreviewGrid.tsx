@@ -4,6 +4,7 @@
 
 import { Clock, LocateFixed, MapPin, X } from "lucide-react";
 import { formatDate } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
 import type { UploadedPhoto } from "@/lib/types";
 
 type PhotoPreviewGridProps = {
@@ -12,6 +13,8 @@ type PhotoPreviewGridProps = {
 };
 
 export function PhotoPreviewGrid({ photos, onRemove }: PhotoPreviewGridProps) {
+  const { t } = useI18n();
+
   if (photos.length === 0) return null;
 
   return (
@@ -39,7 +42,7 @@ export function PhotoPreviewGrid({ photos, onRemove }: PhotoPreviewGridProps) {
               </button>
             ) : null}
             <span className="absolute left-2 top-2 inline-flex items-center rounded-lg bg-white/95 px-2.5 py-1 text-xs font-bold text-stone-800 shadow-sm">
-              {index === 0 ? "Restaurant photo" : `Dish photo ${index}`}
+              {photoLabel(photo, index, t)}
             </span>
           </div>
           <div className="grid gap-2 p-3 text-sm text-stone-600">
@@ -60,6 +63,19 @@ export function PhotoPreviewGrid({ photos, onRemove }: PhotoPreviewGridProps) {
       ))}
     </div>
   );
+}
+
+function photoLabel(
+  photo: UploadedPhoto,
+  index: number,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  const photoType = photo.intendedPhotoType ?? photo.aiAnalysis?.photoType;
+  if (photoType === "restaurant") return t("photoUpload.restaurantBadge");
+  if (photoType === "dish") return t("photoUpload.dishBadge");
+  return index === 0
+    ? t("photoUpload.restaurantBadge")
+    : t("photoUpload.dishBadge");
 }
 
 function locationLabel(photo: UploadedPhoto) {
