@@ -38,6 +38,10 @@ export async function GET(request: Request) {
   }
 
   const profile = await ensureProfileFromUser(supabase, user);
+  if (next === "/auth/reset-password") {
+    return NextResponse.redirect(new URL(next, requestUrl.origin));
+  }
+
   const destination = isProfileComplete(profile)
     ? next
     : `/profile/setup?next=${encodeURIComponent(next)}`;

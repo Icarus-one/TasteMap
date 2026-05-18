@@ -2,6 +2,7 @@ import { hasSupabasePublicEnv } from "@/lib/env";
 import { createTasteListSchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import type { Profile, TasteList, TasteListItem } from "@/lib/types";
 
 export async function GET(request: Request) {
@@ -93,6 +94,16 @@ export async function POST(request: Request) {
   if (error || !data) {
     return jsonError(error?.message ?? "Could not create list.", 400);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "taste_list_created",
+    metadata: {
+      list_id: data.id,
+      visibility: parsed.data.visibility,
+    },
+  });
 
   return jsonOk({ list: data, storage_mode: "supabase" });
 }

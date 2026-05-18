@@ -11,10 +11,12 @@ alter table friendships enable row level security;
 alter table taste_lists enable row level security;
 alter table taste_list_items enable row level security;
 alter table friend_card_sends enable row level security;
+alter table analytics_events enable row level security;
 
 grant usage on schema public to authenticated;
 grant select on profiles to authenticated;
 grant select, insert, update, delete on friendships, taste_lists, taste_list_items, friend_card_sends to authenticated;
+grant select, insert, delete on analytics_events to authenticated;
 
 drop policy if exists "Users can manage own profile" on profiles;
 drop policy if exists "Users can create own profile" on profiles;
@@ -255,3 +257,21 @@ on friend_card_sends for update
 to authenticated
 using ((select auth.uid()) = recipient_id)
 with check ((select auth.uid()) = recipient_id);
+
+drop policy if exists "Users can insert own analytics events" on analytics_events;
+create policy "Users can insert own analytics events"
+on analytics_events for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can view own analytics events" on analytics_events;
+create policy "Users can view own analytics events"
+on analytics_events for select
+to authenticated
+using ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can delete own analytics events" on analytics_events;
+create policy "Users can delete own analytics events"
+on analytics_events for delete
+to authenticated
+using ((select auth.uid()) = user_id);

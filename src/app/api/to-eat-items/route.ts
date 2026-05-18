@@ -8,6 +8,7 @@ import {
   updateLocalToEatItem,
 } from "@/server/localStore";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import {
   createToEatItem,
   deleteToEatItem,
@@ -46,6 +47,18 @@ export async function POST(request: Request) {
   if ("error" in result) {
     return jsonError(result.error, result.status);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "to_eat_item_created",
+    metadata: {
+      item_id: result.item.id,
+      source_platform: parsed.data.source_platform,
+      has_source_url: Boolean(parsed.data.source_url),
+      has_restaurant_name: Boolean(parsed.data.restaurant_name),
+    },
+  });
 
   revalidatePaths();
   return jsonOk({ item: result.item });
@@ -88,6 +101,21 @@ export async function PATCH(request: Request) {
     return jsonError(result.error, result.status);
   }
 
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName:
+      parsed.data.status === "visited" && parsed.data.linked_visit_id
+        ? "to_eat_item_converted"
+        : "to_eat_item_updated",
+    metadata: {
+      item_id: parsed.data.id,
+      status: parsed.data.status,
+      linked_visit_id: parsed.data.linked_visit_id ?? null,
+      linked_restaurant_id: parsed.data.linked_restaurant_id ?? null,
+    },
+  });
+
   revalidatePaths();
   return jsonOk({ item: result.item });
 }
@@ -125,6 +153,13 @@ export async function DELETE(request: Request) {
   if ("error" in result) {
     return jsonError(result.error, result.status);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "to_eat_item_deleted",
+    metadata: { item_id: id },
+  });
 
   revalidatePaths();
   return jsonOk({ ok: true });

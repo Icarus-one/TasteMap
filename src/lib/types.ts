@@ -17,6 +17,43 @@ export type RecommendationPlatform =
 export type ToEatStatus = "to_eat" | "booked" | "visited" | "archived";
 export type FriendshipStatus = "pending" | "accepted" | "blocked";
 export type TasteListVisibility = "private" | "friends" | "public";
+export type AnalyticsEventName =
+  | "page_view"
+  | "profile_saved"
+  | "photo_analyzed"
+  | "to_eat_link_analyzed"
+  | "nearby_restaurants_searched"
+  | "restaurant_match_searched"
+  | "visit_created"
+  | "visit_opened"
+  | "restaurant_opened"
+  | "to_eat_item_opened"
+  | "to_eat_item_created"
+  | "to_eat_item_updated"
+  | "to_eat_item_converted"
+  | "to_eat_item_deleted"
+  | "restaurant_updated"
+  | "restaurant_deleted"
+  | "share_clicked"
+  | "share_link_created"
+  | "export_created"
+  | "friend_request_sent"
+  | "friend_request_accepted"
+  | "friend_connection_removed"
+  | "taste_list_created"
+  | "taste_list_item_added"
+  | "friend_card_sent"
+  | "all_data_deleted";
+
+export type AnalyticsEvent = {
+  id: string;
+  user_id: string;
+  event_name: AnalyticsEventName;
+  path: string | null;
+  session_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
 
 export type AddRecordState =
   | "idle"

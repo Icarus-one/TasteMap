@@ -222,3 +222,39 @@ export const sendFriendCardSchema = z.object({
     .optional()
     .transform((value) => value || null),
 });
+
+export const analyticsEventNameSchema = z.enum([
+  "page_view",
+  "profile_saved",
+  "photo_analyzed",
+  "to_eat_link_analyzed",
+  "nearby_restaurants_searched",
+  "restaurant_match_searched",
+  "visit_created",
+  "visit_opened",
+  "restaurant_opened",
+  "to_eat_item_opened",
+  "to_eat_item_created",
+  "to_eat_item_updated",
+  "to_eat_item_converted",
+  "to_eat_item_deleted",
+  "restaurant_updated",
+  "restaurant_deleted",
+  "share_clicked",
+  "share_link_created",
+  "export_created",
+  "friend_request_sent",
+  "friend_request_accepted",
+  "friend_connection_removed",
+  "taste_list_created",
+  "taste_list_item_added",
+  "friend_card_sent",
+  "all_data_deleted",
+]);
+
+export const analyticsClientEventSchema = z.object({
+  event_name: analyticsEventNameSchema,
+  path: z.string().max(300).nullable().optional(),
+  session_id: z.string().max(80).nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
+});

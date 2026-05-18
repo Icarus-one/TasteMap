@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { PwaServiceWorker } from "@/components/layout/PwaServiceWorker";
 import "./globals.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
+        <AnalyticsTracker />
         <PwaServiceWorker />
       </body>
     </html>

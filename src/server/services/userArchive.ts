@@ -15,6 +15,7 @@ export async function exportUserArchive({
     photos,
     placeCandidates,
     toEatItems,
+    analyticsEvents,
   ] = await Promise.all([
     supabase.from("restaurants").select("*").eq("user_id", userId),
     supabase.from("restaurant_aliases").select("*").eq("user_id", userId),
@@ -23,6 +24,7 @@ export async function exportUserArchive({
     supabase.from("photos").select("*").eq("user_id", userId),
     supabase.from("place_candidates").select("*").eq("user_id", userId),
     supabase.from("to_eat_items").select("*").eq("user_id", userId),
+    supabase.from("analytics_events").select("*").eq("user_id", userId),
   ]);
 
   return {
@@ -35,6 +37,7 @@ export async function exportUserArchive({
     photos: photos.data ?? [],
     place_candidates: placeCandidates.data ?? [],
     to_eat_items: toEatItems.data ?? [],
+    analytics_events: analyticsEvents.data ?? [],
   };
 }
 
@@ -65,6 +68,7 @@ export async function deleteUserArchive({
   await supabase.from("dishes").delete().eq("user_id", userId);
   await supabase.from("visits").delete().eq("user_id", userId);
   await supabase.from("restaurants").delete().eq("user_id", userId);
+  await supabase.from("analytics_events").delete().eq("user_id", userId);
 
   return { ok: true as const };
 }

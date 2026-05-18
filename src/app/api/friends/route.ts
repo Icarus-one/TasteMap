@@ -2,6 +2,7 @@ import { hasSupabasePublicEnv } from "@/lib/env";
 import { friendActionSchema, friendRequestSchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import type { Friendship, Profile } from "@/lib/types";
 
 type FriendBundle = {
@@ -144,6 +145,16 @@ export async function POST(request: Request) {
     return jsonError(error?.message ?? "Could not send friend request.", 400);
   }
 
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "friend_request_sent",
+    metadata: {
+      friendship_id: friendship.id,
+      addressee_id: target.id,
+    },
+  });
+
   return jsonOk({
     friendship,
     profile: target,
@@ -207,6 +218,16 @@ export async function PATCH(request: Request) {
       return jsonError(error?.message ?? "Could not accept request.", 400);
     }
 
+    await recordAnalyticsEvent({
+      supabase: session.supabase,
+      userId: session.user.id,
+      eventName: "friend_request_accepted",
+      metadata: {
+        friendship_id: current.id,
+        requester_id: current.requester_id,
+      },
+    });
+
     return jsonOk({ friendship: data, storage_mode: "supabase" });
   }
 
@@ -216,5 +237,11 @@ export async function PATCH(request: Request) {
     .eq("id", current.id);
 
   if (error) return jsonError(error.message, 400);
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "friend_connection_removed",
+    metadata: { friendship_id: current.id, previous_status: current.status },
+  });
   return jsonOk({ ok: true, storage_mode: "supabase" });
 }

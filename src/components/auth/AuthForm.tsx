@@ -21,10 +21,17 @@ type AuthFormProps = {
   nextPath?: string;
 };
 
+const rememberedEmailKey = "tastemap-remembered-email";
+
 export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() =>
+    mode === "login" ? getRememberedEmail() : "",
+  );
   const [password, setPassword] = useState("");
+  const [rememberEmail, setRememberEmail] = useState(() =>
+    mode === "login" ? Boolean(getRememberedEmail()) : true,
+  );
   const [defaultHandle] = useState(() => generateProfileHandle());
   const [displayName, setDisplayName] = useState("");
   const [handle, setHandle] = useState("");
@@ -44,6 +51,7 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
+    const normalizedEmail = email.trim();
     const normalizedHandle = effectiveHandle.trim().toLowerCase();
 
     if (isSignup && !/^[A-Za-z0-9._-]{1,20}$/.test(normalizedHandle)) {
@@ -67,7 +75,7 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
     redirectTo.searchParams.set("next", sanitizeNextPath(nextPath));
     const result = isSignup
       ? await supabase.auth.signUp({
-          email,
+          email: normalizedEmail,
           password,
           options: {
             emailRedirectTo: redirectTo.toString(),
@@ -77,7 +85,10 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
             },
           },
         })
-      : await supabase.auth.signInWithPassword({ email, password });
+      : await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
 
     setIsLoading(false);
 
@@ -111,6 +122,7 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
       }
     }
 
+    updateRememberedEmail(normalizedEmail, rememberEmail && !isSignup);
     router.push(sanitizeNextPath(nextPath));
     router.refresh();
   }
@@ -143,11 +155,11 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
                 type="text"
                 required
                 maxLength={30}
-              value={effectiveDisplayName}
-              onChange={(event) => {
-                setDisplayNameTouched(true);
-                setDisplayName(event.target.value);
-              }}
+                value={effectiveDisplayName}
+                onChange={(event) => {
+                  setDisplayNameTouched(true);
+                  setDisplayName(event.target.value);
+                }}
                 className="h-11 w-full rounded-lg border border-stone-200 bg-white pl-10 pr-3 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
                 placeholder={t("profile.displayNamePlaceholder")}
               />
@@ -229,6 +241,25 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
           {t("auth.passwordHelp")}
         </span>
       </label>
+      {!isSignup ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <label className="inline-flex items-center gap-2 font-semibold text-stone-700">
+            <input
+              type="checkbox"
+              checked={rememberEmail}
+              onChange={(event) => setRememberEmail(event.target.checked)}
+              className="size-4 rounded border-stone-300 text-stone-950"
+            />
+            {t("auth.rememberEmail")}
+          </label>
+          <Link
+            href="/forgot-password"
+            className="font-semibold text-stone-950 underline decoration-stone-300 underline-offset-4"
+          >
+            {t("auth.forgotPassword")}
+          </Link>
+        </div>
+      ) : null}
       {message ? (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
           {message}
@@ -298,6 +329,28 @@ export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
     }
 
     window.location.assign(data.url);
+  }
+}
+
+function updateRememberedEmail(email: string, shouldRemember: boolean) {
+  try {
+    if (shouldRemember) {
+      window.localStorage.setItem(rememberedEmailKey, email);
+      return;
+    }
+
+    window.localStorage.removeItem(rememberedEmailKey);
+  } catch {
+    // Browsers can block localStorage; sign-in should still work.
+  }
+}
+
+function getRememberedEmail() {
+  try {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(rememberedEmailKey) ?? "";
+  } catch {
+    return "";
   }
 }
 

@@ -2,6 +2,7 @@ import { hasSupabasePublicEnv } from "@/lib/env";
 import { addTasteListItemSchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import type { Restaurant, TasteList } from "@/lib/types";
 
 type TasteListItemRouteContext = {
@@ -78,6 +79,17 @@ export async function POST(
     .update({ updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", session.user.id);
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "taste_list_item_added",
+    metadata: {
+      list_id: id,
+      item_id: data.id,
+      restaurant_id: target.id,
+    },
+  });
 
   return jsonOk({ item: data, storage_mode: "supabase" });
 }

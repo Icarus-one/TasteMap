@@ -3,6 +3,7 @@ import { sendFriendCardSchema } from "@/lib/validators";
 import { compactAddress } from "@/lib/format";
 import { jsonError, jsonOk } from "@/server/http";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import type { FriendCardSend, Friendship, Profile, Restaurant } from "@/lib/types";
 
 export async function GET(request: Request) {
@@ -117,6 +118,17 @@ export async function POST(request: Request) {
   if (error || !data) {
     return jsonError(error?.message ?? "Could not send this card.", 400);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "friend_card_sent",
+    metadata: {
+      card_id: data.id,
+      recipient_id: parsed.data.recipient_id,
+      restaurant_id: target.id,
+    },
+  });
 
   return jsonOk({ card: data, storage_mode: "supabase" });
 }

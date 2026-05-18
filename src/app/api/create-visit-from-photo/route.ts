@@ -3,6 +3,7 @@ import { createVisitSchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { createLocalVisitFromPhotoRecord } from "@/server/localStore";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import { createVisitFromPhotoRecord } from "@/server/services/visitRecords";
 
 export async function POST(request: Request) {
@@ -43,6 +44,20 @@ export async function POST(request: Request) {
     if ("error" in result) {
       return jsonError(result.error, result.status);
     }
+
+    await recordAnalyticsEvent({
+      supabase: session.supabase,
+      userId: session.user.id,
+      eventName: "visit_created",
+      metadata: {
+        visit_id: result.visitId,
+        restaurant_id: result.restaurantId,
+        photo_count: parsed.data.photos.length,
+        dish_count: parsed.data.dishes.length,
+        restaurant_mode: parsed.data.restaurant.mode,
+        used_existing_restaurant: parsed.data.restaurant.mode === "existing",
+      },
+    });
 
     return jsonOk({
       visit_id: result.visitId,

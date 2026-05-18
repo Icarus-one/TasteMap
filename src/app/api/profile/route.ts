@@ -1,6 +1,7 @@
 import { profileInputSchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 
 export async function PATCH(request: Request) {
   const session = await requireSecureRouteSession(request);
@@ -37,6 +38,13 @@ export async function PATCH(request: Request) {
 
     return jsonError(error.message, 500);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "profile_saved",
+    metadata: { has_avatar: Boolean(parsed.data.avatar_url) },
+  });
 
   return jsonOk({ profile: data });
 }

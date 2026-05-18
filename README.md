@@ -147,6 +147,8 @@ Run the dev server:
 npm run dev
 ```
 
+The `dev` script is pinned to port 3000. If that port is already taken, stop the older Next.js process first, then run the command again.
+
 Open:
 
 ```text
@@ -178,6 +180,7 @@ OPENAI_MODEL=gpt-5.4-mini
 PLACES_API_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+ANALYTICS_ADMIN_EMAILS=
 ```
 
 ### Notes
@@ -187,6 +190,26 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `PLACES_API_KEY` should be treated as server-side for this app
 - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is browser-visible and must be restricted by HTTP referrer in Google Cloud
 - `NEXT_PUBLIC_APP_URL` must be updated for production
+- `ANALYTICS_ADMIN_EMAILS` is a comma-separated list of founder/admin emails that can see all-user metrics on `/metrics`; other users only see their own activity
+
+## Growth metrics
+
+TasteMap records first-party analytics events in Supabase for beta traction evidence.
+
+Tracked automatically:
+
+- page views and detail opens
+- photo and link analysis
+- visit and to-eat item creation
+- search, nearby place lookup, sharing, friends, taste lists, and friend cards
+
+Open `/metrics` after signing in to view MAU, WAU, WAU/MAU, core actions, D7/D30 retention, top pages, and latest events.
+
+For existing Supabase projects, run:
+
+```sql
+supabase/migrations/202605181100_add_analytics_events.sql
+```
 
 ## Supabase setup
 

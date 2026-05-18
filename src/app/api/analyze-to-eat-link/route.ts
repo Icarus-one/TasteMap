@@ -4,6 +4,7 @@ import {
   checkRateLimit,
   requireSecureRouteSession,
 } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 
 const linkAnalysisSchema = {
   type: "object",
@@ -80,16 +81,16 @@ export async function POST(request: Request) {
   const rawContext = [sourceInput, pageContext ?? ""].filter(Boolean).join("\n");
 
   if (!process.env.OPENAI_API_KEY) {
-    return Response.json(
-      fallbackAnalysis(
+    const analysis = fallbackAnalysis(
         sourceUrl,
         pageData?.imageUrl ?? null,
         sourcePlatform,
         rawContext,
         pageContext,
         "OPENAI_API_KEY is not configured.",
-      ),
-    );
+      );
+    await recordToEatLinkAnalysisEvent(session, analysis);
+    return Response.json(analysis);
   }
 
   const response = await fetch("https://api.openai.com/v1/responses", {
@@ -147,17 +148,16 @@ export async function POST(request: Request) {
 
   if (!response.ok) {
     const message = await response.text().catch(() => "");
-    return Response.json(
-      fallbackAnalysis(
+    const analysis = fallbackAnalysis(
         sourceUrl,
         pageData?.imageUrl ?? null,
         sourcePlatform,
         rawContext,
         pageContext,
         message || "OpenAI link analysis failed.",
-      ),
-      { status: 200 },
-    );
+      );
+    await recordToEatLinkAnalysisEvent(session, analysis);
+    return Response.json(analysis, { status: 200 });
   }
 
   const payload = await response.json();
@@ -165,25 +165,53 @@ export async function POST(request: Request) {
   const analysis = parseModelJson(text);
 
   if (!analysis) {
-    return Response.json(
-      fallbackAnalysis(
+    const fallback = fallbackAnalysis(
         sourceUrl,
         pageData?.imageUrl ?? null,
         sourcePlatform,
         rawContext,
         pageContext,
         "AI response was not valid JSON.",
-      ),
-    );
+      );
+    await recordToEatLinkAnalysisEvent(session, fallback);
+    return Response.json(fallback);
   }
 
   const enriched = enrichAnalysis(analysis, rawContext);
-
-  return Response.json({
+  const responsePayload = {
     sourceUrl,
     sourceImageUrl: pageData?.imageUrl ?? null,
     sourcePlatform,
     ...enriched,
+  };
+
+  await recordToEatLinkAnalysisEvent(session, responsePayload);
+  return Response.json(responsePayload);
+}
+
+async function recordToEatLinkAnalysisEvent(
+  session: Extract<
+    Awaited<ReturnType<typeof requireSecureRouteSession>>,
+    { ok: true }
+  >,
+  analysis: Record<string, unknown>,
+) {
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "to_eat_link_analyzed",
+    metadata: {
+      source_platform:
+        typeof analysis.sourcePlatform === "string"
+          ? analysis.sourcePlatform
+          : "unknown",
+      has_source_url: Boolean(analysis.sourceUrl),
+      has_restaurant_name: Boolean(analysis.restaurantName),
+      item_count: Array.isArray(analysis.items) ? analysis.items.length : 0,
+      confidence:
+        typeof analysis.confidence === "string" ? analysis.confidence : "unknown",
+      used_fallback: Boolean(analysis.error),
+    },
   });
 }
 

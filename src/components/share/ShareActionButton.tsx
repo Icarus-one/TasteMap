@@ -52,6 +52,7 @@ export function ShareActionButton({
           text,
           url,
         });
+        void recordShareClick(url);
         return;
       }
     } catch (error) {
@@ -62,6 +63,7 @@ export function ShareActionButton({
 
     const fallbackText = [title, text, url].filter(Boolean).join("\n\n");
     await navigator.clipboard.writeText(fallbackText);
+    void recordShareClick(url);
     setStatus("copied");
     window.setTimeout(() => setStatus("idle"), 1800);
   }
@@ -86,4 +88,23 @@ export function ShareActionButton({
       )}
     </button>
   );
+}
+
+async function recordShareClick(url?: string) {
+  try {
+    await fetch("/api/analytics/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_name: "share_clicked",
+        path: window.location.pathname,
+        metadata: {
+          share_url_path: url ? new URL(url).pathname : null,
+        },
+      }),
+      keepalive: true,
+    });
+  } catch {
+    // Share analytics should not affect sharing.
+  }
 }

@@ -3,6 +3,7 @@ import {
   checkRateLimit,
   requireSecureRouteSession,
 } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 
 type GooglePlace = {
   id?: string;
@@ -38,6 +39,13 @@ export async function POST(request: Request) {
   }
 
   if (!process.env.PLACES_API_KEY) {
+    await recordAnalyticsEvent({
+      supabase: session.supabase,
+      userId: session.user.id,
+      eventName: "nearby_restaurants_searched",
+      metadata: { result_count: 0, used_fallback: true },
+    });
+
     return Response.json({
       candidates: [],
       warning: "PLACES_API_KEY is not configured. Use manual restaurant entry.",
@@ -75,6 +83,13 @@ export async function POST(request: Request) {
 
   if (!response.ok) {
     const message = await response.text().catch(() => "");
+    await recordAnalyticsEvent({
+      supabase: session.supabase,
+      userId: session.user.id,
+      eventName: "nearby_restaurants_searched",
+      metadata: { result_count: 0, used_fallback: true },
+    });
+
     return Response.json(
       {
         candidates: [],
@@ -115,7 +130,15 @@ export async function POST(request: Request) {
     return first - second;
   });
 
-  return Response.json({ candidates: candidates.slice(0, 10) });
+  const results = candidates.slice(0, 10);
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "nearby_restaurants_searched",
+    metadata: { result_count: results.length, used_fallback: false },
+  });
+
+  return Response.json({ candidates: results });
 }
 
 function distanceMeters(

@@ -239,6 +239,45 @@ create table if not exists friend_card_sends (
   check (sender_id <> recipient_id)
 );
 
+create table if not exists analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  event_name text not null check (
+    event_name in (
+      'page_view',
+      'profile_saved',
+      'photo_analyzed',
+      'to_eat_link_analyzed',
+      'nearby_restaurants_searched',
+      'restaurant_match_searched',
+      'visit_created',
+      'visit_opened',
+      'restaurant_opened',
+      'to_eat_item_opened',
+      'to_eat_item_created',
+      'to_eat_item_updated',
+      'to_eat_item_converted',
+      'to_eat_item_deleted',
+      'restaurant_updated',
+      'restaurant_deleted',
+      'share_clicked',
+      'share_link_created',
+      'export_created',
+      'friend_request_sent',
+      'friend_request_accepted',
+      'friend_connection_removed',
+      'taste_list_created',
+      'taste_list_item_added',
+      'friend_card_sent',
+      'all_data_deleted'
+    )
+  ),
+  path text,
+  session_id text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
 create index if not exists restaurants_user_provider_idx
   on restaurants (user_id, provider_place_id)
   where provider_place_id is not null;
@@ -265,3 +304,5 @@ create index if not exists friend_card_sends_recipient_idx on friend_card_sends 
 create index if not exists friend_card_sends_sender_idx on friend_card_sends (sender_id, created_at desc);
 create index if not exists friend_card_sends_restaurant_idx on friend_card_sends (restaurant_id);
 create index if not exists friend_card_sends_visit_idx on friend_card_sends (visit_id);
+create index if not exists analytics_events_user_created_idx on analytics_events (user_id, created_at desc);
+create index if not exists analytics_events_event_created_idx on analytics_events (event_name, created_at desc);

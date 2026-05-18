@@ -6,6 +6,7 @@ import {
   updateLocalRestaurant,
 } from "@/server/localStore";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 
 type RestaurantRouteContext = {
   params: Promise<{ id: string }>;
@@ -56,6 +57,14 @@ export async function PATCH(request: Request, context: RestaurantRouteContext) {
     return jsonError(error?.message ?? "Restaurant not found.", 404);
   }
 
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "restaurant_updated",
+    path: `/restaurants/${id}`,
+    metadata: { restaurant_id: id },
+  });
+
   return jsonOk({ restaurant: data, storage_mode: "supabase" });
 }
 
@@ -97,6 +106,13 @@ export async function DELETE(
   if (error) {
     return jsonError(error.message, 400);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "restaurant_deleted",
+    metadata: { restaurant_id: id },
+  });
 
   return jsonOk({ ok: true, storage_mode: "supabase" });
 }

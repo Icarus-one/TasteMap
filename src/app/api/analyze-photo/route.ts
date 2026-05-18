@@ -4,6 +4,7 @@ import {
   checkRateLimit,
   requireSecureRouteSession,
 } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 
 const confidenceValues = ["high", "medium", "low", "unknown"] as const;
 
@@ -93,7 +94,9 @@ export async function POST(request: Request) {
   }
 
   if (!process.env.OPENAI_API_KEY) {
-    return Response.json(fallbackAnalysis("OPENAI_API_KEY is not configured."));
+    const analysis = fallbackAnalysis("OPENAI_API_KEY is not configured.");
+    await recordPhotoAnalysisEvent(session, analysis);
+    return Response.json(analysis);
   }
 
   const response = await fetch("https://api.openai.com/v1/responses", {
@@ -138,10 +141,9 @@ export async function POST(request: Request) {
 
   if (!response.ok) {
     const message = await response.text().catch(() => "");
-    return Response.json(
-      fallbackAnalysis(message || "OpenAI photo analysis failed."),
-      { status: 200 },
-    );
+    const analysis = fallbackAnalysis(message || "OpenAI photo analysis failed.");
+    await recordPhotoAnalysisEvent(session, analysis);
+    return Response.json(analysis, { status: 200 });
   }
 
   const payload = await response.json();
@@ -149,10 +151,36 @@ export async function POST(request: Request) {
   const analysis = parseModelJson(text);
 
   if (!analysis) {
-    return Response.json(fallbackAnalysis("AI response was not valid JSON."));
+    const fallback = fallbackAnalysis("AI response was not valid JSON.");
+    await recordPhotoAnalysisEvent(session, fallback);
+    return Response.json(fallback);
   }
 
+  await recordPhotoAnalysisEvent(session, analysis);
   return Response.json(analysis);
+}
+
+async function recordPhotoAnalysisEvent(
+  session: Extract<
+    Awaited<ReturnType<typeof requireSecureRouteSession>>,
+    { ok: true }
+  >,
+  analysis: Record<string, unknown>,
+) {
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "photo_analyzed",
+    metadata: {
+      confidence: typeof analysis.confidence === "string" ? analysis.confidence : null,
+      detected_dish_count: Array.isArray(analysis.detected_dishes)
+        ? analysis.detected_dishes.length
+        : 0,
+      photo_type:
+        typeof analysis.photo_type === "string" ? analysis.photo_type : "unknown",
+      used_fallback: Boolean(analysis.error),
+    },
+  });
 }
 
 function fallbackAnalysis(error: string) {

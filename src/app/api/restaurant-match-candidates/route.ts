@@ -3,6 +3,7 @@ import { restaurantMatchQuerySchema } from "@/lib/validators";
 import { jsonError, jsonOk } from "@/server/http";
 import { searchLocalRestaurantMatches } from "@/server/localStore";
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 import { searchRestaurantMatchCandidates } from "@/server/services/restaurantMatches";
 
 export async function POST(request: Request) {
@@ -32,6 +33,17 @@ export async function POST(request: Request) {
     supabase: session.supabase,
     userId: session.user.id,
     query: parsed.data,
+  });
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "restaurant_match_searched",
+    metadata: {
+      result_count: candidates.length,
+      has_location: Boolean(parsed.data.latitude && parsed.data.longitude),
+      has_provider_place_id: Boolean(parsed.data.provider_place_id),
+    },
   });
 
   return jsonOk({ candidates, storage_mode: "supabase" });

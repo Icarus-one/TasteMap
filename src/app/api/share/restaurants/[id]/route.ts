@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { getAppUrl } from "@/lib/env";
 import { jsonError, jsonOk } from "@/server/http";
 import { requireSecureRouteSession } from "@/server/security";
+import { recordAnalyticsEvent } from "@/server/services/analytics";
 
 type ShareRestaurantRouteContext = {
   params: Promise<{ id: string }>;
@@ -36,6 +37,14 @@ export async function POST(
     .maybeSingle();
 
   if (existing?.token) {
+    await recordAnalyticsEvent({
+      supabase: session.supabase,
+      userId: session.user.id,
+      eventName: "share_link_created",
+      path: `/restaurants/${id}`,
+      metadata: { restaurant_id: id, reused_existing_link: true },
+    });
+
     return jsonOk({
       url: new URL(`/share/restaurants/${existing.token}`, getAppUrl()).toString(),
     });
@@ -54,6 +63,14 @@ export async function POST(
   if (error || !data?.token) {
     return jsonError(error?.message ?? "Could not create share link.", 500);
   }
+
+  await recordAnalyticsEvent({
+    supabase: session.supabase,
+    userId: session.user.id,
+    eventName: "share_link_created",
+    path: `/restaurants/${id}`,
+    metadata: { restaurant_id: id, reused_existing_link: false },
+  });
 
   return jsonOk({
     url: new URL(`/share/restaurants/${data.token}`, getAppUrl()).toString(),
