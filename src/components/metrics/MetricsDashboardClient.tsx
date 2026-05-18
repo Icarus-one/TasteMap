@@ -66,6 +66,7 @@ const copy = {
     weeklyActive: "Weekly active",
     monthlyActive: "Monthly active",
     shareBehaviorCount: "Share behavior",
+    shareBehaviorShort: "Share",
     recentDailyRows: "Latest daily rows",
     investorReadout: "Investor readout",
     investorActive: "Active usage",
@@ -142,6 +143,7 @@ const copy = {
     weeklyActive: "周活用户",
     monthlyActive: "月活用户",
     shareBehaviorCount: "分享行为数",
+    shareBehaviorShort: "分享",
     recentDailyRows: "最近每日明细",
     investorReadout: "投资人速览",
     investorActive: "活跃使用",
@@ -218,6 +220,7 @@ const copy = {
     weeklyActive: "Actifs hebdo",
     monthlyActive: "Actifs mensuels",
     shareBehaviorCount: "Actions de partage",
+    shareBehaviorShort: "Partage",
     recentDailyRows: "Dernieres lignes quotidiennes",
     investorReadout: "Lecture investisseur",
     investorActive: "Usage actif",
@@ -888,12 +891,12 @@ function DailyGrowthChart({
 
   return (
     <div className="grid gap-4">
-      <div className="overflow-x-auto">
+      <div className="overflow-hidden">
         <svg
           role="img"
           aria-label={labels.dailyGrowth}
           viewBox={`0 0 ${width} ${height}`}
-          className="h-[300px] min-w-[720px] rounded-lg bg-stone-50"
+          className="h-[300px] w-full rounded-lg bg-stone-50"
         >
           {ticks.map((tick) => {
             const y = yForValue(tick);
@@ -1003,11 +1006,17 @@ function DailyMetricTable({
       <table className="w-full text-left text-xs">
         <thead className="bg-stone-100 font-bold uppercase text-stone-500">
           <tr>
-            <th className="px-2 py-2">{labels.time}</th>
-            <th className="px-2 py-2">{labels.cumulativeUsers}</th>
-            <th className="px-2 py-2">{labels.dailyNewUsers}</th>
-            <th className="px-2 py-2">{labels.dau}</th>
-            <th className="px-2 py-2">{labels.shareBehaviorCount}</th>
+            <th className="px-2 py-2 text-[10px] leading-4">{labels.time}</th>
+            <th className="px-2 py-2 text-[10px] leading-4">
+              {labels.cumulativeUsers}
+            </th>
+            <th className="px-2 py-2 text-[10px] leading-4">
+              {labels.dailyNewUsers}
+            </th>
+            <th className="px-2 py-2 text-[10px] leading-4">{labels.dau}</th>
+            <th className="px-2 py-2 text-[10px] leading-4">
+              {labels.shareBehaviorShort}
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-stone-200 bg-white">
