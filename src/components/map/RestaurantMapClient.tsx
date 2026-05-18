@@ -205,7 +205,12 @@ export function RestaurantMapClient({
               <span className="flex items-center gap-1 text-xs text-stone-500">
                 <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
                 <span className="truncate">
-                  {compactAddress(point.city, point.address)}
+                  {compactAddress(
+                    point.city,
+                    point.address,
+                    point.latitude,
+                    point.longitude,
+                  )}
                 </span>
               </span>
             </button>
@@ -234,7 +239,12 @@ function SelectedRestaurantCard({ point }: { point: RestaurantMapPoint }) {
         />
         <p className="flex items-center gap-1 text-sm text-stone-500">
           <MapPin aria-hidden="true" className="size-4" />
-          {compactAddress(point.city, point.address)}
+          {compactAddress(
+            point.city,
+            point.address,
+            point.latitude,
+            point.longitude,
+          )}
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -268,7 +278,12 @@ function SelectedRestaurantCard({ point }: { point: RestaurantMapPoint }) {
 
 function infoWindowContent(point: RestaurantMapPoint) {
   const score = point.score !== null ? `${formatScore(point.score)} stars` : "Not scored";
-  const address = compactAddress(point.city, point.address);
+  const address = compactAddress(
+    point.city,
+    point.address,
+    point.latitude,
+    point.longitude,
+  );
 
   return `
     <div style="display:grid;gap:4px;max-width:220px;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">

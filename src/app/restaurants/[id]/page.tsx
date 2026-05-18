@@ -91,7 +91,12 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 />
                 <p className="flex items-center gap-2 text-sm text-stone-500">
                   <MapPin aria-hidden="true" className="size-4" />
-                  {compactAddress(restaurant.city, restaurant.address)}
+                  {compactAddress(
+                    restaurant.city,
+                    restaurant.address,
+                    restaurant.latitude,
+                    restaurant.longitude,
+                  )}
                 </p>
               </div>
               {latestVisit?.summary ? (
@@ -137,7 +142,12 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
         <RestaurantLocationMap
           apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? null}
           name={restaurant.name}
-          address={compactAddress(restaurant.city, restaurant.address)}
+          address={compactAddress(
+            restaurant.city,
+            restaurant.address,
+            restaurant.latitude,
+            restaurant.longitude,
+          )}
           latitude={restaurant.latitude}
           longitude={restaurant.longitude}
         />

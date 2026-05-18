@@ -6,6 +6,19 @@ import type { Confidence, LocationSource } from "@/lib/types";
 
 export type CreateVisitInput = z.infer<typeof createVisitSchema>;
 
+type ExistingRestaurantRow = {
+  id: string;
+  name: string;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  cuisine_type?: string | null;
+  provider_place_id?: string | null;
+  provider_name?: string | null;
+};
+
 export async function createVisitFromPhotoRecord({
   supabase,
   userId,
@@ -153,36 +166,49 @@ async function resolveRestaurant({
     restaurant.cuisine_type ?? deriveCuisineTypeFromDishes(dishes) ?? null;
 
   if (restaurant.mode === "existing" && restaurant.restaurant_id) {
-    if (derivedCuisineType) {
-      await supabase
-        .from("restaurants")
-        .update({
-          cuisine_type: derivedCuisineType,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", restaurant.restaurant_id)
-        .eq("user_id", userId);
-    }
     const { data } = await supabase
       .from("restaurants")
-      .select("id, name")
+      .select(
+        "id, name, address, city, country, latitude, longitude, cuisine_type, provider_place_id, provider_name",
+      )
       .eq("id", restaurant.restaurant_id)
       .eq("user_id", userId)
       .single();
 
     if (!data) return { error: "Selected restaurant was not found." };
+
+    const updateError = await patchExistingRestaurant({
+      supabase,
+      userId,
+      existing: data,
+      restaurant,
+      derivedCuisineType,
+    });
+    if (updateError) return { error: updateError };
+
     return { restaurantId: data.id, restaurantName: data.name };
   }
 
   if (restaurant.mode === "provider" && restaurant.provider_place_id) {
     const { data: existing } = await supabase
       .from("restaurants")
-      .select("id, name")
+      .select(
+        "id, name, address, city, country, latitude, longitude, cuisine_type, provider_place_id, provider_name",
+      )
       .eq("user_id", userId)
       .eq("provider_place_id", restaurant.provider_place_id)
       .maybeSingle();
 
     if (existing) {
+      const updateError = await patchExistingRestaurant({
+        supabase,
+        userId,
+        existing,
+        restaurant,
+        derivedCuisineType,
+      });
+      if (updateError) return { error: updateError };
+
       return { restaurantId: existing.id, restaurantName: existing.name };
     }
   }
@@ -211,6 +237,77 @@ async function resolveRestaurant({
   }
 
   return { restaurantId: created.id, restaurantName: created.name };
+}
+
+async function patchExistingRestaurant({
+  supabase,
+  userId,
+  existing,
+  restaurant,
+  derivedCuisineType,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  existing: ExistingRestaurantRow;
+  restaurant: CreateVisitInput["restaurant"];
+  derivedCuisineType: string | null;
+}) {
+  const patch: Record<string, unknown> = {};
+
+  assignIfMissing(patch, "address", existing.address, restaurant.address);
+  assignIfMissing(patch, "city", existing.city, restaurant.city);
+  assignIfMissing(patch, "country", existing.country, restaurant.country);
+  assignIfMissing(patch, "cuisine_type", existing.cuisine_type, derivedCuisineType);
+  assignIfMissing(
+    patch,
+    "provider_place_id",
+    existing.provider_place_id,
+    restaurant.provider_place_id,
+  );
+  assignIfMissing(
+    patch,
+    "provider_name",
+    existing.provider_name,
+    restaurant.provider_name,
+  );
+
+  if (
+    (!isNumber(existing.latitude) || !isNumber(existing.longitude)) &&
+    isNumber(restaurant.latitude) &&
+    isNumber(restaurant.longitude)
+  ) {
+    patch.latitude = restaurant.latitude;
+    patch.longitude = restaurant.longitude;
+  }
+
+  if (Object.keys(patch).length === 0) return null;
+
+  const { error } = await supabase
+    .from("restaurants")
+    .update({
+      ...patch,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", existing.id)
+    .eq("user_id", userId);
+
+  return error?.message ?? null;
+}
+
+function assignIfMissing(
+  patch: Record<string, unknown>,
+  key: string,
+  existing: string | null | undefined,
+  incoming: string | null | undefined,
+) {
+  const value = incoming?.trim();
+  if (!existing?.trim() && value) {
+    patch[key] = value;
+  }
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
 }
 
 function confidenceForLocation(source: LocationSource): Confidence {

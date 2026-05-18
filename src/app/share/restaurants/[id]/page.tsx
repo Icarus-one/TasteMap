@@ -102,7 +102,12 @@ export default async function SharedRestaurantPage({
               />
               <p className="flex items-center gap-2 text-sm text-stone-500">
                 <MapPin aria-hidden="true" className="size-4" />
-                {compactAddress(restaurant.city, restaurant.address)}
+                {compactAddress(
+                  restaurant.city,
+                  restaurant.address,
+                  restaurant.latitude,
+                  restaurant.longitude,
+                )}
               </p>
               {latestVisit?.summary ? (
                 <UserText

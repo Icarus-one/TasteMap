@@ -37,8 +37,21 @@ export function revisitLabel(value?: RevisitChoice | null) {
   return "No decision";
 }
 
-export function compactAddress(city?: string | null, address?: string | null) {
+export function compactAddress(
+  city?: string | null,
+  address?: string | null,
+  latitude?: number | null,
+  longitude?: number | null,
+) {
   if (city) return city;
-  if (!address) return "Address not set";
-  return address.split(",").slice(0, 2).join(", ");
+  if (address) return address.split(",").slice(0, 2).join(", ");
+  if (
+    typeof latitude === "number" &&
+    Number.isFinite(latitude) &&
+    typeof longitude === "number" &&
+    Number.isFinite(longitude)
+  ) {
+    return "Pinned location";
+  }
+  return "Address not set";
 }

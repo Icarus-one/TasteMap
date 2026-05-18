@@ -109,6 +109,8 @@ export default async function VisitPage({ params }: VisitPageProps) {
           address={compactAddress(
             visit.restaurants?.city ?? null,
             visit.restaurants?.address ?? null,
+            visit.restaurants?.latitude ?? null,
+            visit.restaurants?.longitude ?? null,
           )}
           latitude={visit.restaurants?.latitude ?? null}
           longitude={visit.restaurants?.longitude ?? null}

@@ -28,7 +28,12 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
     .map((dish) => dish.name)
     .slice(0, 3);
   const tags = buildRestaurantTags(restaurant);
-  const locationLabel = compactAddress(restaurant.city, restaurant.address);
+  const locationLabel = compactAddress(
+    restaurant.city,
+    restaurant.address,
+    restaurant.latitude,
+    restaurant.longitude,
+  );
   const mapsUrl = buildGoogleMapsSearchUrl(restaurant);
 
   return (

@@ -27,6 +27,8 @@ export function VisitCard({ visit }: VisitCardProps) {
   const locationLabel = compactAddress(
     restaurant?.city ?? null,
     restaurant?.address ?? null,
+    restaurant?.latitude ?? null,
+    restaurant?.longitude ?? null,
   );
   const mapsUrl = buildGoogleMapsSearchUrl({
     name: restaurant?.name,

@@ -293,7 +293,12 @@ function RestaurantPreviewCard({
             <p className="flex items-center gap-1 text-xs text-white/80">
               <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
               <span className="truncate">
-                {compactAddress(restaurant.city, restaurant.address)}
+                {compactAddress(
+                  restaurant.city,
+                  restaurant.address,
+                  restaurant.latitude,
+                  restaurant.longitude,
+                )}
               </span>
             </p>
           </div>

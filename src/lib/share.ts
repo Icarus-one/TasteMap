@@ -22,7 +22,12 @@ export function buildRestaurantShareText(restaurant: RestaurantWithRelations) {
 
   return [
     restaurant.name,
-    compactAddress(restaurant.city, restaurant.address),
+    compactAddress(
+      restaurant.city,
+      restaurant.address,
+      restaurant.latitude,
+      restaurant.longitude,
+    ),
     latestVisit?.total_score !== null && latestVisit?.total_score !== undefined
       ? `Stars: ${formatScore(latestVisit.total_score)}/5`
       : null,

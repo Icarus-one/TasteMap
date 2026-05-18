@@ -103,7 +103,12 @@ export async function POST(request: Request) {
       recipient_id: parsed.data.recipient_id,
       restaurant_id: target.id,
       card_title: target.name,
-      card_subtitle: compactAddress(target.city, target.address),
+      card_subtitle: compactAddress(
+        target.city,
+        target.address,
+        target.latitude,
+        target.longitude,
+      ),
       note: parsed.data.note,
     })
     .select("*")
