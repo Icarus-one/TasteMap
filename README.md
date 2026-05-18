@@ -316,12 +316,14 @@ template to send the token hash through TasteMap before showing the new-password
 form:
 
 ```html
-{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/auth/reset-password
+{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery
 ```
 
-If you keep the default Supabase verification URL instead, make sure the
-`redirect_to` destination is allow-listed; otherwise Supabase falls back to the
-Site URL and users land on the normal login/home flow instead of the reset form.
+The app passes `/auth/confirm` as `redirectTo` for password reset emails. Keep
+that exact URL in the Supabase redirect allow list. If you keep the default
+Supabase verification URL instead, make sure the `redirect_to` destination is
+allow-listed; otherwise Supabase falls back to the Site URL and users land on the
+normal login/home flow instead of the reset form.
 
 ## Current status
 
