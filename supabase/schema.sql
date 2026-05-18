@@ -186,6 +186,31 @@ create table if not exists shared_restaurant_links (
   unique (user_id, restaurant_id)
 );
 
+alter table to_eat_items
+  add column if not exists source_share_token text references shared_restaurant_links(token) on delete set null;
+
+create table if not exists share_events (
+  id uuid primary key default gen_random_uuid(),
+  token text not null references shared_restaurant_links(token) on delete cascade,
+  event_name text not null check (
+    event_name in (
+      'share_opened',
+      'share_signup_clicked',
+      'share_login_clicked',
+      'share_to_do_saved',
+      'share_to_do_converted'
+    )
+  ),
+  sharer_user_id uuid not null references auth.users(id) on delete cascade,
+  restaurant_id uuid not null references restaurants(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
+  visitor_id text,
+  to_eat_item_id uuid references to_eat_items(id) on delete set null,
+  visit_id uuid references visits(id) on delete set null,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
 create table if not exists friendships (
   id uuid primary key default gen_random_uuid(),
   requester_id uuid not null references auth.users(id) on delete cascade,
@@ -278,6 +303,23 @@ create table if not exists analytics_events (
   created_at timestamptz default now()
 );
 
+create table if not exists analytics_daily_snapshots (
+  snapshot_date date primary key,
+  total_registered_users integer not null default 0,
+  new_users integer not null default 0,
+  daily_active_users integer not null default 0,
+  weekly_active_users integer not null default 0,
+  monthly_active_users integer not null default 0,
+  share_behavior_count integer not null default 0,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table if not exists analytics_admins (
+  email text primary key,
+  created_at timestamptz default now()
+);
+
 create index if not exists restaurants_user_provider_idx
   on restaurants (user_id, provider_place_id)
   where provider_place_id is not null;
@@ -291,8 +333,20 @@ create index if not exists dishes_user_visit_idx on dishes (user_id, visit_id);
 create index if not exists photos_user_visit_idx on photos (user_id, visit_id);
 create index if not exists place_candidates_user_visit_idx on place_candidates (user_id, visit_id);
 create index if not exists to_eat_items_user_status_idx on to_eat_items (user_id, status, created_at desc);
+create index if not exists to_eat_items_source_share_token_idx
+  on to_eat_items (source_share_token)
+  where source_share_token is not null;
 create index if not exists shared_restaurant_links_restaurant_idx
   on shared_restaurant_links (restaurant_id);
+create index if not exists share_events_token_created_idx
+  on share_events (token, created_at desc);
+create index if not exists share_events_sharer_created_idx
+  on share_events (sharer_user_id, created_at desc);
+create index if not exists share_events_event_created_idx
+  on share_events (event_name, created_at desc);
+create index if not exists share_events_visitor_idx
+  on share_events (visitor_id)
+  where visitor_id is not null;
 create index if not exists friendships_requester_idx on friendships (requester_id, status);
 create index if not exists friendships_addressee_idx on friendships (addressee_id, status);
 create index if not exists taste_lists_user_visibility_idx on taste_lists (user_id, visibility, updated_at desc);
@@ -306,3 +360,5 @@ create index if not exists friend_card_sends_restaurant_idx on friend_card_sends
 create index if not exists friend_card_sends_visit_idx on friend_card_sends (visit_id);
 create index if not exists analytics_events_user_created_idx on analytics_events (user_id, created_at desc);
 create index if not exists analytics_events_event_created_idx on analytics_events (event_name, created_at desc);
+create index if not exists analytics_daily_snapshots_updated_idx
+  on analytics_daily_snapshots (updated_at desc);

@@ -10,6 +10,10 @@ import {
 import { assertSameOrigin, requireSecureRouteSession } from "@/server/security";
 import { recordAnalyticsEvent } from "@/server/services/analytics";
 import {
+  getShareLinkAttribution,
+  recordShareAttributionEvent,
+} from "@/server/services/shareAttribution";
+import {
   createToEatItem,
   deleteToEatItem,
   updateToEatItem,
@@ -39,6 +43,14 @@ export async function POST(request: Request) {
     return session.response;
   }
 
+  const sourceShareToken = parsed.data.source_share_token ?? null;
+  if (sourceShareToken) {
+    const attribution = await getShareLinkAttribution(sourceShareToken);
+    if (!attribution) {
+      return jsonError("Shared restaurant link not found.", 404);
+    }
+  }
+
   const result = await createToEatItem({
     supabase: session.supabase,
     userId: session.user.id,
@@ -57,8 +69,22 @@ export async function POST(request: Request) {
       source_platform: parsed.data.source_platform,
       has_source_url: Boolean(parsed.data.source_url),
       has_restaurant_name: Boolean(parsed.data.restaurant_name),
+      source_share_token: sourceShareToken,
     },
   });
+
+  if (sourceShareToken) {
+    await recordShareAttributionEvent({
+      token: sourceShareToken,
+      eventName: "share_to_do_saved",
+      userId: session.user.id,
+      toEatItemId: result.item.id,
+      metadata: {
+        item_id: result.item.id,
+        source_platform: parsed.data.source_platform,
+      },
+    });
+  }
 
   revalidatePaths();
   return jsonOk({ item: result.item });
@@ -101,20 +127,39 @@ export async function PATCH(request: Request) {
     return jsonError(result.error, result.status);
   }
 
+  const eventName =
+    parsed.data.status === "visited" && parsed.data.linked_visit_id
+      ? "to_eat_item_converted"
+      : "to_eat_item_updated";
+  const updatedItem = result.item as { source_share_token?: string | null };
+
   await recordAnalyticsEvent({
     supabase: session.supabase,
     userId: session.user.id,
-    eventName:
-      parsed.data.status === "visited" && parsed.data.linked_visit_id
-        ? "to_eat_item_converted"
-        : "to_eat_item_updated",
+    eventName,
     metadata: {
       item_id: parsed.data.id,
       status: parsed.data.status,
       linked_visit_id: parsed.data.linked_visit_id ?? null,
       linked_restaurant_id: parsed.data.linked_restaurant_id ?? null,
+      source_share_token: updatedItem.source_share_token ?? null,
     },
   });
+
+  if (eventName === "to_eat_item_converted" && updatedItem.source_share_token) {
+    await recordShareAttributionEvent({
+      token: updatedItem.source_share_token,
+      eventName: "share_to_do_converted",
+      userId: session.user.id,
+      toEatItemId: parsed.data.id,
+      visitId: parsed.data.linked_visit_id ?? null,
+      metadata: {
+        item_id: parsed.data.id,
+        linked_visit_id: parsed.data.linked_visit_id ?? null,
+        linked_restaurant_id: parsed.data.linked_restaurant_id ?? null,
+      },
+    });
+  }
 
   revalidatePaths();
   return jsonOk({ item: result.item });

@@ -4,16 +4,23 @@ import type { ReactNode } from "react";
 import {
   Activity,
   BarChart3,
+  CalendarDays,
+  ClipboardPlus,
   Clock3,
   MousePointerClick,
   Repeat2,
+  Share2,
   Target,
+  TrendingUp,
   UserCheck,
   Users,
 } from "lucide-react";
 import { useLanguage, type LanguageCode } from "@/lib/i18n";
 import type { AnalyticsEventName } from "@/lib/types";
-import type { AnalyticsOverview } from "@/server/services/analyticsMetrics";
+import type {
+  AnalyticsOverview,
+  DailyGrowthMetric,
+} from "@/server/services/analyticsMetrics";
 
 type MetricsDashboardClientProps = {
   overview: AnalyticsOverview;
@@ -29,7 +36,11 @@ const copy = {
     allUsers: "all users",
     currentUser: "current user",
     registeredUsers: "Registered users",
+    newToday: "New today",
     newIn30d: "new in 30d",
+    dau: "DAU",
+    wau: "WAU",
+    activeToday: "active today",
     mau: "MAU",
     wauDetail: "WAU",
     stickiness: "WAU / MAU",
@@ -48,6 +59,14 @@ const copy = {
     retention: "Retention",
     weeklyCoreActions: "Weekly core actions",
     dailyActiveUsers: "Daily active users",
+    dailyGrowth: "Daily growth and activity",
+    cumulativeUsers: "Cumulative users",
+    dailyNewUsers: "New users",
+    dailyActive: "Daily active",
+    weeklyActive: "Weekly active",
+    monthlyActive: "Monthly active",
+    shareBehaviorCount: "Share behavior",
+    recentDailyRows: "Latest daily rows",
     investorReadout: "Investor readout",
     investorActive: "Active usage",
     investorActiveText: "people were active in the last 30 days.",
@@ -59,6 +78,17 @@ const copy = {
     topPages: "Top pages, last 30d",
     userActivity: "Most active users, last 30d",
     latestEvents: "Latest events",
+    shareFunnel: "Share funnel, last 30d",
+    shareLinks: "Share links",
+    shareOpens: "Share opens",
+    shareVisitors: "Share visitors",
+    shareSaves: "Saved to-do",
+    shareConversions: "To-do to log",
+    sharePulledUsers: "Pulled users",
+    shareSaveRate: "save rate",
+    shareConversionRate: "conversion rate",
+    topSharedCards: "Top shared cards",
+    emptyShares: "No share-attributed activity yet.",
     emptyEvents: "No events recorded yet.",
     emptyPageViews: "No page views recorded yet.",
     emptyUsers: "No active users in this window yet.",
@@ -82,7 +112,11 @@ const copy = {
     allUsers: "全部用户",
     currentUser: "当前用户",
     registeredUsers: "注册用户",
+    newToday: "今日新增",
     newIn30d: "近 30 天新增",
+    dau: "日活用户",
+    wau: "周活用户",
+    activeToday: "今日活跃",
     mau: "月活用户",
     wauDetail: "周活用户",
     stickiness: "周活 / 月活",
@@ -101,6 +135,14 @@ const copy = {
     retention: "留存",
     weeklyCoreActions: "每周核心行为",
     dailyActiveUsers: "每日活跃用户",
+    dailyGrowth: "每日增长与活跃",
+    cumulativeUsers: "累计注册用户",
+    dailyNewUsers: "新增用户",
+    dailyActive: "日活用户",
+    weeklyActive: "周活用户",
+    monthlyActive: "月活用户",
+    shareBehaviorCount: "分享行为数",
+    recentDailyRows: "最近每日明细",
     investorReadout: "投资人速览",
     investorActive: "活跃使用",
     investorActiveText: "人在近 30 天内有活跃记录。",
@@ -112,6 +154,17 @@ const copy = {
     topPages: "近 30 天热门页面",
     userActivity: "近 30 天最活跃用户",
     latestEvents: "最近事件",
+    shareFunnel: "近 30 天分享漏斗",
+    shareLinks: "分享链接",
+    shareOpens: "分享打开",
+    shareVisitors: "分享访客",
+    shareSaves: "存入待吃",
+    shareConversions: "待吃转记录",
+    sharePulledUsers: "拉动用户",
+    shareSaveRate: "保存率",
+    shareConversionRate: "转记录率",
+    topSharedCards: "传播最好的餐厅卡",
+    emptyShares: "还没有分享归因行为。",
     emptyEvents: "还没有记录到事件。",
     emptyPageViews: "还没有记录到页面访问。",
     emptyUsers: "这个窗口内还没有活跃用户。",
@@ -135,7 +188,11 @@ const copy = {
     allUsers: "tous les utilisateurs",
     currentUser: "utilisateur actuel",
     registeredUsers: "Utilisateurs inscrits",
+    newToday: "Nouveaux aujourd'hui",
     newIn30d: "nouveaux en 30 j",
+    dau: "DAU",
+    wau: "WAU",
+    activeToday: "actifs aujourd'hui",
     mau: "MAU",
     wauDetail: "WAU",
     stickiness: "WAU / MAU",
@@ -154,6 +211,14 @@ const copy = {
     retention: "Retention",
     weeklyCoreActions: "Actions coeur hebdo",
     dailyActiveUsers: "Utilisateurs actifs quotidiens",
+    dailyGrowth: "Croissance et activite quotidiennes",
+    cumulativeUsers: "Utilisateurs cumules",
+    dailyNewUsers: "Nouveaux utilisateurs",
+    dailyActive: "Actifs quotidiens",
+    weeklyActive: "Actifs hebdo",
+    monthlyActive: "Actifs mensuels",
+    shareBehaviorCount: "Actions de partage",
+    recentDailyRows: "Dernieres lignes quotidiennes",
     investorReadout: "Lecture investisseur",
     investorActive: "Usage actif",
     investorActiveText: "personnes actives sur les 30 derniers jours.",
@@ -165,6 +230,17 @@ const copy = {
     topPages: "Pages principales, 30 derniers jours",
     userActivity: "Utilisateurs les plus actifs, 30 derniers jours",
     latestEvents: "Derniers evenements",
+    shareFunnel: "Entonnoir de partage, 30 j",
+    shareLinks: "Liens partages",
+    shareOpens: "Ouvertures",
+    shareVisitors: "Visiteurs",
+    shareSaves: "Ajouts a essayer",
+    shareConversions: "Essai en visite",
+    sharePulledUsers: "Utilisateurs tires",
+    shareSaveRate: "taux d'ajout",
+    shareConversionRate: "taux conversion",
+    topSharedCards: "Cartes les plus partagees",
+    emptyShares: "Aucune activite attribuee au partage.",
     emptyEvents: "Aucun evenement pour le moment.",
     emptyPageViews: "Aucune vue de page pour le moment.",
     emptyUsers: "Aucun utilisateur actif sur cette periode.",
@@ -278,6 +354,12 @@ export function MetricsDashboardClient({ overview }: MetricsDashboardClientProps
   const language = useLanguage();
   const c = copy[language];
   const eventCopy = eventLabels[language];
+  const latestDailyMetric =
+    overview.dailyGrowth30d[overview.dailyGrowth30d.length - 1] ?? null;
+  const shareBehavior30d = overview.dailyGrowth30d.reduce(
+    (sum, day) => sum + day.shareBehaviorCount,
+    0,
+  );
 
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-8">
@@ -309,16 +391,43 @@ export function MetricsDashboardClient({ overview }: MetricsDashboardClientProps
           icon={<Users aria-hidden="true" className="size-5" />}
         />
         <MetricCard
+          label={c.newToday}
+          value={formatNumber(overview.newUsersToday, language)}
+          detail={c.dailyNewUsers}
+          icon={<TrendingUp aria-hidden="true" className="size-5" />}
+        />
+        <MetricCard
+          label={c.dau}
+          value={formatNumber(overview.activeUsers1d, language)}
+          detail={c.activeToday}
+          icon={<CalendarDays aria-hidden="true" className="size-5" />}
+        />
+        <MetricCard
+          label={c.wau}
+          value={formatNumber(overview.activeUsers7d, language)}
+          detail={c.weeklyActive}
+          icon={<Repeat2 aria-hidden="true" className="size-5" />}
+        />
+      </section>
+
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
           label={c.mau}
           value={formatNumber(overview.activeUsers30d, language)}
-          detail={`${formatNumber(overview.activeUsers7d, language)} ${c.wauDetail}`}
-          icon={<Repeat2 aria-hidden="true" className="size-5" />}
+          detail={c.monthlyActive}
+          icon={<Users aria-hidden="true" className="size-5" />}
         />
         <MetricCard
           label={c.stickiness}
           value={formatPercent(overview.wauMauRatio, language)}
           detail={c.weeklyStickiness}
           icon={<BarChart3 aria-hidden="true" className="size-5" />}
+        />
+        <MetricCard
+          label={c.shareBehaviorCount}
+          value={formatNumber(shareBehavior30d, language)}
+          detail={c.shareFunnel}
+          icon={<Share2 aria-hidden="true" className="size-5" />}
         />
         <MetricCard
           label={c.coreActions}
@@ -355,12 +464,92 @@ export function MetricsDashboardClient({ overview }: MetricsDashboardClientProps
         />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+        <Panel title={c.dailyGrowth}>
+          <DailyGrowthChart data={overview.dailyGrowth30d} language={language} labels={c} />
+        </Panel>
+
+        <Panel title={c.recentDailyRows}>
+          <DailyMetricTable
+            data={overview.dailyGrowth30d.slice(-7)}
+            language={language}
+            labels={c}
+          />
+        </Panel>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+        <Panel title={c.shareFunnel}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <MetricCard
+              label={c.shareLinks}
+              value={formatNumber(overview.shareFunnel30d.linksCreated, language)}
+              detail={c.shareFunnel}
+              icon={<Share2 aria-hidden="true" className="size-5" />}
+            />
+            <MetricCard
+              label={c.shareVisitors}
+              value={formatNumber(
+                overview.shareFunnel30d.uniqueVisitors,
+                language,
+              )}
+              detail={`${formatNumber(overview.shareFunnel30d.opens, language)} ${c.shareOpens}`}
+              icon={<Users aria-hidden="true" className="size-5" />}
+            />
+            <MetricCard
+              label={c.shareSaves}
+              value={formatNumber(overview.shareFunnel30d.toDoSaves, language)}
+              detail={`${formatPercent(
+                overview.shareFunnel30d.saveRate,
+                language,
+              )} ${c.shareSaveRate}`}
+              icon={<ClipboardPlus aria-hidden="true" className="size-5" />}
+            />
+            <MetricCard
+              label={c.sharePulledUsers}
+              value={formatNumber(overview.shareFunnel30d.pulledUsers, language)}
+              detail={`${formatNumber(
+                overview.shareFunnel30d.conversions,
+                language,
+              )} ${c.shareConversions} / ${formatPercent(
+                overview.shareFunnel30d.conversionRate,
+                language,
+              )} ${c.shareConversionRate}`}
+              icon={<UserCheck aria-hidden="true" className="size-5" />}
+            />
+          </div>
+        </Panel>
+
+        <Panel title={c.topSharedCards}>
+          <div className="grid gap-3">
+            {overview.shareFunnel30d.topShares.length > 0 ? (
+              overview.shareFunnel30d.topShares.map((share) => (
+                <ShareRow
+                  key={share.token}
+                  restaurantName={share.restaurantName}
+                  opens={share.opens}
+                  saves={share.saves}
+                  conversions={share.conversions}
+                  pulledUsers={share.pulledUsers}
+                  language={language}
+                />
+              ))
+            ) : (
+              <EmptyState text={c.emptyShares} />
+            )}
+          </div>
+        </Panel>
+      </section>
+
+      <section className="grid gap-4">
         <Panel title={c.investorReadout}>
           <div className="grid gap-3">
             <ReadoutLine
               label={c.investorActive}
-              value={formatNumber(overview.activeUsers30d, language)}
+              value={formatNumber(
+                latestDailyMetric?.monthlyActiveUsers ?? overview.activeUsers30d,
+                language,
+              )}
               text={c.investorActiveText}
             />
             <ReadoutLine
@@ -376,25 +565,6 @@ export function MetricsDashboardClient({ overview }: MetricsDashboardClientProps
               )}`}
               text={c.investorRetentionText}
             />
-          </div>
-        </Panel>
-
-        <Panel title={c.dailyActiveUsers}>
-          <div className="grid grid-cols-7 gap-2 sm:grid-cols-[repeat(14,minmax(0,1fr))]">
-            {overview.dailyActiveUsers14d.map((day) => {
-              const max = Math.max(
-                1,
-                ...overview.dailyActiveUsers14d.map((item) => item.count),
-              );
-              return (
-                <MiniBar
-                  key={day.date}
-                  label={day.date.slice(5)}
-                  value={day.count}
-                  max={max}
-                />
-              );
-            })}
           </div>
         </Panel>
       </section>
@@ -614,6 +784,39 @@ function ReadoutLine({
   );
 }
 
+function ShareRow({
+  restaurantName,
+  opens,
+  saves,
+  conversions,
+  pulledUsers,
+  language,
+}: {
+  restaurantName: string;
+  opens: number;
+  saves: number;
+  conversions: number;
+  pulledUsers: number;
+  language: LanguageCode;
+}) {
+  return (
+    <div className="rounded-lg bg-stone-50 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <p className="min-w-0 truncate text-sm font-bold text-stone-900">
+          {restaurantName}
+        </p>
+        <span className="whitespace-nowrap font-mono text-xs text-stone-500">
+          {formatNumber(pulledUsers, language)} users
+        </span>
+      </div>
+      <p className="mt-1 text-xs font-medium text-stone-500">
+        {formatNumber(opens, language)} opens / {formatNumber(saves, language)} saves /{" "}
+        {formatNumber(conversions, language)} logs
+      </p>
+    </div>
+  );
+}
+
 function RetentionBlock({
   label,
   value,
@@ -629,6 +832,206 @@ function RetentionBlock({
       <p className="mt-2 text-3xl font-bold text-stone-950">
         {formatPercent(value, language)}
       </p>
+    </div>
+  );
+}
+
+type DailyMetricKey = Exclude<keyof DailyGrowthMetric, "date">;
+
+const dailyMetricSeries: Array<{
+  key: DailyMetricKey;
+  labelKey: string;
+  color: string;
+}> = [
+  {
+    key: "totalRegisteredUsers",
+    labelKey: "cumulativeUsers",
+    color: "#047857",
+  },
+  { key: "newUsers", labelKey: "dailyNewUsers", color: "#0ea5e9" },
+  { key: "dailyActiveUsers", labelKey: "dailyActive", color: "#f59e0b" },
+  { key: "weeklyActiveUsers", labelKey: "weeklyActive", color: "#7c3aed" },
+  { key: "monthlyActiveUsers", labelKey: "monthlyActive", color: "#dc2626" },
+  { key: "shareBehaviorCount", labelKey: "shareBehaviorCount", color: "#334155" },
+];
+
+function DailyGrowthChart({
+  data,
+  language,
+  labels,
+}: {
+  data: DailyGrowthMetric[];
+  language: LanguageCode;
+  labels: Record<string, string>;
+}) {
+  if (data.length === 0) return <EmptyState text={labels.emptyEvents} />;
+
+  const width = 760;
+  const height = 300;
+  const margin = { top: 18, right: 18, bottom: 50, left: 48 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const maxValue = Math.max(
+    1,
+    ...data.flatMap((day) =>
+      dailyMetricSeries.map((series) => day[series.key] as number),
+    ),
+  );
+  const ticks = Array.from({ length: 5 }, (_, index) =>
+    Math.round((maxValue / 4) * index),
+  );
+  const xForIndex = (index: number) =>
+    margin.left + (plotWidth * index) / Math.max(1, data.length - 1);
+  const yForValue = (value: number) =>
+    margin.top + plotHeight - (plotHeight * value) / maxValue;
+  const labelEvery = Math.max(1, Math.ceil(data.length / 6));
+
+  return (
+    <div className="grid gap-4">
+      <div className="overflow-x-auto">
+        <svg
+          role="img"
+          aria-label={labels.dailyGrowth}
+          viewBox={`0 0 ${width} ${height}`}
+          className="h-[300px] min-w-[720px] rounded-lg bg-stone-50"
+        >
+          {ticks.map((tick) => {
+            const y = yForValue(tick);
+            return (
+              <g key={tick}>
+                <line
+                  x1={margin.left}
+                  x2={width - margin.right}
+                  y1={y}
+                  y2={y}
+                  stroke="#e7e5e4"
+                  strokeWidth="1"
+                />
+                <text
+                  x={margin.left - 10}
+                  y={y + 4}
+                  textAnchor="end"
+                  className="fill-stone-500 text-[11px] font-medium"
+                >
+                  {formatNumber(tick, language)}
+                </text>
+              </g>
+            );
+          })}
+          <line
+            x1={margin.left}
+            x2={margin.left}
+            y1={margin.top}
+            y2={height - margin.bottom}
+            stroke="#a8a29e"
+          />
+          <line
+            x1={margin.left}
+            x2={width - margin.right}
+            y1={height - margin.bottom}
+            y2={height - margin.bottom}
+            stroke="#a8a29e"
+          />
+          {dailyMetricSeries.map((series) => {
+            const points = data
+              .map((day, index) => {
+                const x = xForIndex(index);
+                const y = yForValue(day[series.key] as number);
+                return `${x},${y}`;
+              })
+              .join(" ");
+
+            return (
+              <polyline
+                key={series.key}
+                points={points}
+                fill="none"
+                stroke={series.color}
+                strokeWidth="3"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            );
+          })}
+          {data.map((day, index) =>
+            index % labelEvery === 0 || index === data.length - 1 ? (
+              <text
+                key={day.date}
+                x={xForIndex(index)}
+                y={height - 20}
+                textAnchor="middle"
+                className="fill-stone-500 text-[11px] font-medium"
+              >
+                {day.date.slice(5)}
+              </text>
+            ) : null,
+          )}
+        </svg>
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {dailyMetricSeries.map((series) => (
+          <span
+            key={series.key}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600"
+          >
+            <span
+              aria-hidden="true"
+              className="size-2 rounded-full"
+              style={{ backgroundColor: series.color }}
+            />
+            {labels[series.labelKey]}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DailyMetricTable({
+  data,
+  language,
+  labels,
+}: {
+  data: DailyGrowthMetric[];
+  language: LanguageCode;
+  labels: Record<string, string>;
+}) {
+  if (data.length === 0) return <EmptyState text={labels.emptyEvents} />;
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-stone-200">
+      <table className="w-full text-left text-xs">
+        <thead className="bg-stone-100 font-bold uppercase text-stone-500">
+          <tr>
+            <th className="px-2 py-2">{labels.time}</th>
+            <th className="px-2 py-2">{labels.cumulativeUsers}</th>
+            <th className="px-2 py-2">{labels.dailyNewUsers}</th>
+            <th className="px-2 py-2">{labels.dau}</th>
+            <th className="px-2 py-2">{labels.shareBehaviorCount}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-stone-200 bg-white">
+          {data.map((day) => (
+            <tr key={day.date}>
+              <td className="whitespace-nowrap px-2 py-2 font-mono text-stone-500">
+                {day.date.slice(5)}
+              </td>
+              <td className="px-2 py-2 font-mono text-stone-700">
+                {formatNumber(day.totalRegisteredUsers, language)}
+              </td>
+              <td className="px-2 py-2 font-mono text-stone-700">
+                {formatNumber(day.newUsers, language)}
+              </td>
+              <td className="px-2 py-2 font-mono text-stone-700">
+                {formatNumber(day.dailyActiveUsers, language)}
+              </td>
+              <td className="px-2 py-2 font-mono text-stone-700">
+                {formatNumber(day.shareBehaviorCount, language)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -653,19 +1056,6 @@ function BarRow({
       <div className="h-2 overflow-hidden rounded-full bg-stone-100">
         <div className="h-full rounded-full bg-emerald-600" style={{ width }} />
       </div>
-    </div>
-  );
-}
-
-function MiniBar({ label, value, max }: { label: string; value: number; max: number }) {
-  const height = `${Math.max(12, Math.round((value / max) * 56))}px`;
-
-  return (
-    <div className="grid min-w-0 justify-items-center gap-2">
-      <div className="flex h-16 w-full items-end rounded bg-stone-100 px-1">
-        <div className="w-full rounded bg-sky-600" style={{ height }} />
-      </div>
-      <span className="text-[10px] font-medium text-stone-500">{label}</span>
     </div>
   );
 }

@@ -912,6 +912,7 @@ function buildOptimisticItem({
     shareable,
     linked_restaurant_id: null,
     linked_visit_id: null,
+    source_share_token: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   } satisfies ToEatItem;

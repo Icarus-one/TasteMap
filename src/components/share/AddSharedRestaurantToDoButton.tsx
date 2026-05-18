@@ -5,6 +5,7 @@ import { Check, ClipboardPlus, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 type AddSharedRestaurantToDoButtonProps = {
+  shareToken: string;
   restaurant: {
     name: string;
     city: string | null;
@@ -16,6 +17,7 @@ type AddSharedRestaurantToDoButtonProps = {
 };
 
 export function AddSharedRestaurantToDoButton({
+  shareToken,
   restaurant,
   note,
   tags,
@@ -45,6 +47,7 @@ export function AddSharedRestaurantToDoButton({
         priority: 3,
         status: "to_eat",
         shareable: false,
+        source_share_token: shareToken,
       }),
     });
 

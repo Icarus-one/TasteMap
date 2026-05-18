@@ -7,16 +7,20 @@ alter table photos enable row level security;
 alter table place_candidates enable row level security;
 alter table to_eat_items enable row level security;
 alter table shared_restaurant_links enable row level security;
+alter table share_events enable row level security;
 alter table friendships enable row level security;
 alter table taste_lists enable row level security;
 alter table taste_list_items enable row level security;
 alter table friend_card_sends enable row level security;
 alter table analytics_events enable row level security;
+alter table analytics_daily_snapshots enable row level security;
+alter table analytics_admins enable row level security;
 
 grant usage on schema public to authenticated;
 grant select on profiles to authenticated;
 grant select, insert, update, delete on friendships, taste_lists, taste_list_items, friend_card_sends to authenticated;
 grant select, insert, delete on analytics_events to authenticated;
+grant select on share_events to authenticated;
 
 drop policy if exists "Users can manage own profile" on profiles;
 drop policy if exists "Users can create own profile" on profiles;
@@ -99,6 +103,12 @@ on shared_restaurant_links for all
 to authenticated
 using ((select auth.uid()) = user_id)
 with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Sharers can view own share events" on share_events;
+create policy "Sharers can view own share events"
+on share_events for select
+to authenticated
+using ((select auth.uid()) = sharer_user_id);
 
 drop policy if exists "Users can view related friendships" on friendships;
 create policy "Users can view related friendships"

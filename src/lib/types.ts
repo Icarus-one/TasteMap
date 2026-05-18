@@ -45,6 +45,13 @@ export type AnalyticsEventName =
   | "friend_card_sent"
   | "all_data_deleted";
 
+export type ShareEventName =
+  | "share_opened"
+  | "share_signup_clicked"
+  | "share_login_clicked"
+  | "share_to_do_saved"
+  | "share_to_do_converted";
+
 export type AnalyticsEvent = {
   id: string;
   user_id: string;
@@ -244,6 +251,7 @@ export type ToEatItem = {
   shareable: boolean;
   linked_restaurant_id: string | null;
   linked_visit_id: string | null;
+  source_share_token: string | null;
   created_at: string;
   updated_at: string;
 };

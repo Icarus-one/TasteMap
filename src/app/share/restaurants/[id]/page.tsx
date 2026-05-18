@@ -1,12 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, Check, MapPin, X } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { I18nText } from "@/components/i18n/I18nText";
 import { UserText } from "@/components/i18n/UserText";
 import { AddSharedRestaurantToDoButton } from "@/components/share/AddSharedRestaurantToDoButton";
+import {
+  ShareAttributionTracker,
+  TrackableShareLink,
+} from "@/components/share/ShareAttributionTracker";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { compactAddress, formatDate } from "@/lib/format";
 import { getSessionContext } from "@/lib/data";
@@ -58,6 +61,7 @@ export default async function SharedRestaurantPage({
 
   return (
     <main className="min-h-screen bg-stone-50">
+      <ShareAttributionTracker token={token} />
       <AppHeader showAuthActions={false} />
       <div className="mx-auto grid w-full max-w-5xl gap-6 px-4 py-6 sm:px-6 sm:py-8">
         <section className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
@@ -134,6 +138,7 @@ export default async function SharedRestaurantPage({
               <ScoreBadge score={latestVisit?.total_score ?? null} label="Stars" />
               {context.user ? (
                 <AddSharedRestaurantToDoButton
+                  shareToken={token}
                   restaurant={{
                     name: restaurant.name,
                     city: restaurant.city,
@@ -145,18 +150,22 @@ export default async function SharedRestaurantPage({
                 />
               ) : (
                 <div className="grid gap-2">
-                  <Link
+                  <TrackableShareLink
                     href={`/signup?next=${encodeURIComponent(sharePath)}`}
+                    token={token}
+                    eventName="share_signup_clicked"
                     className="inline-flex h-11 items-center justify-center rounded-lg bg-stone-950 px-4 text-sm font-bold text-white transition hover:bg-stone-800"
                   >
                     <I18nText k="share.createToSave" />
-                  </Link>
-                  <Link
+                  </TrackableShareLink>
+                  <TrackableShareLink
                     href={`/login?next=${encodeURIComponent(sharePath)}`}
+                    token={token}
+                    eventName="share_login_clicked"
                     className="inline-flex h-11 items-center justify-center rounded-lg border border-stone-200 bg-white px-4 text-sm font-bold text-stone-800 transition hover:border-stone-300"
                   >
                     <I18nText k="share.signIn" />
-                  </Link>
+                  </TrackableShareLink>
                 </div>
               )}
             </div>

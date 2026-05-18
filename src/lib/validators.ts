@@ -139,6 +139,11 @@ export const createToEatItemSchema = z.object({
   shareable: z.boolean().optional().default(false),
   linked_restaurant_id: z.string().uuid().nullable().optional(),
   linked_visit_id: z.string().uuid().nullable().optional(),
+  source_share_token: z
+    .string()
+    .regex(/^[a-f0-9]{36}$/i)
+    .nullable()
+    .optional(),
 });
 
 export const updateToEatItemSchema = createToEatItemSchema.partial().extend({
@@ -256,5 +261,15 @@ export const analyticsClientEventSchema = z.object({
   event_name: analyticsEventNameSchema,
   path: z.string().max(300).nullable().optional(),
   session_id: z.string().max(80).nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
+});
+
+export const shareEventInputSchema = z.object({
+  event_name: z.enum([
+    "share_opened",
+    "share_signup_clicked",
+    "share_login_clicked",
+  ]),
+  visitor_id: z.string().trim().min(8).max(80).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
