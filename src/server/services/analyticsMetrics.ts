@@ -114,10 +114,7 @@ export async function getAnalyticsOverview({
   userId: string;
   userEmail: string | null;
 }): Promise<AnalyticsOverview> {
-  const adminCandidate = createSupabaseAdminClient();
-  const admin = await isAnalyticsAdmin(adminCandidate, userEmail)
-    ? adminCandidate
-    : null;
+  const admin = await getAnalyticsAdminClientForEmail(userEmail);
   const client = admin ?? supabase;
   const scope = admin ? "all_users" : "current_user";
   const now = new Date();
@@ -266,6 +263,11 @@ export async function getAnalyticsOverview({
   }
 
   return overview;
+}
+
+export async function getAnalyticsAdminClientForEmail(email: string | null) {
+  const adminCandidate = createSupabaseAdminClient();
+  return await isAnalyticsAdmin(adminCandidate, email) ? adminCandidate : null;
 }
 
 async function isAnalyticsAdmin(
