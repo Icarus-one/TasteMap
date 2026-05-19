@@ -283,8 +283,10 @@ For auth callback support, make sure Supabase includes:
 ```text
 http://localhost:3000/auth/callback
 http://localhost:3000/auth/confirm
+http://localhost:3000/auth/reset-password
 https://your-domain.com/auth/callback
 https://your-domain.com/auth/confirm
+https://your-domain.com/auth/reset-password
 ```
 
 ### Supabase Auth checklist
@@ -296,8 +298,10 @@ Site URL: https://your-domain.com
 Redirect URLs:
   http://localhost:3000/auth/callback
   http://localhost:3000/auth/confirm
+  http://localhost:3000/auth/reset-password
   https://your-domain.com/auth/callback
   https://your-domain.com/auth/confirm
+  https://your-domain.com/auth/reset-password
 ```
 
 For social login, enable each provider in `Authentication -> Providers`.
@@ -319,11 +323,11 @@ form:
 {{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery
 ```
 
-The app passes `/auth/confirm` as `redirectTo` for password reset emails. Keep
-that exact URL in the Supabase redirect allow list. If you keep the default
-Supabase verification URL instead, make sure the `redirect_to` destination is
-allow-listed; otherwise Supabase falls back to the Site URL and users land on the
-normal login/home flow instead of the reset form.
+The app passes `/auth/reset-password` as `redirectTo` for password reset emails.
+Keep that exact URL in the Supabase redirect allow list. TasteMap also includes a
+global recovery-link catcher so older or default Supabase links that land on
+`/login` with a recovery token are sent through to the reset form instead of
+leaving users on the normal login flow.
 
 ## Current status
 

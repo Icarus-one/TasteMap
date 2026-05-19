@@ -2,7 +2,11 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { ConfigNotice } from "@/components/layout/ConfigNotice";
 import { MetricsDashboardClient } from "@/components/metrics/MetricsDashboardClient";
 import { getSessionContext } from "@/lib/data";
-import { getAnalyticsOverview } from "@/server/services/analyticsMetrics";
+import {
+  getAnalyticsAdminClientForEmail,
+  getAnalyticsOverview,
+} from "@/server/services/analyticsMetrics";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +23,9 @@ export default async function MetricsPage() {
       </main>
     );
   }
+
+  const admin = await getAnalyticsAdminClientForEmail(context.user.email ?? null);
+  if (!admin) notFound();
 
   const overview = await getAnalyticsOverview({
     supabase: context.supabase,

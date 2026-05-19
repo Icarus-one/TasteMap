@@ -263,6 +263,8 @@ export async function createLocalToEatItem(input: {
   status?: ToEatItem["status"];
   shareable?: boolean;
   source_share_token?: string | null;
+  source_sharer_user_id?: string | null;
+  source_restaurant_id?: string | null;
 }) {
   const db = await readLocalDb();
   const now = new Date().toISOString();
@@ -287,6 +289,8 @@ export async function createLocalToEatItem(input: {
     linked_restaurant_id: null,
     linked_visit_id: null,
     source_share_token: input.source_share_token ?? null,
+    source_sharer_user_id: input.source_sharer_user_id ?? null,
+    source_restaurant_id: input.source_restaurant_id ?? null,
     created_at: now,
     updated_at: now,
   };
@@ -322,6 +326,8 @@ export async function updateLocalToEatItem({
       | "linked_restaurant_id"
       | "linked_visit_id"
       | "source_share_token"
+      | "source_sharer_user_id"
+      | "source_restaurant_id"
     >
   >;
 }) {

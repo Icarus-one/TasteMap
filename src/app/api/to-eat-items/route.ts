@@ -44,17 +44,28 @@ export async function POST(request: Request) {
   }
 
   const sourceShareToken = parsed.data.source_share_token ?? null;
+  let shareSourceAttribution: {
+    source_sharer_user_id: string;
+    source_restaurant_id: string;
+  } | null = null;
+
   if (sourceShareToken) {
     const attribution = await getShareLinkAttribution(sourceShareToken);
     if (!attribution) {
       return jsonError("Shared restaurant link not found.", 404);
     }
+
+    shareSourceAttribution = {
+      source_sharer_user_id: attribution.sharerUserId,
+      source_restaurant_id: attribution.restaurantId,
+    };
   }
 
   const result = await createToEatItem({
     supabase: session.supabase,
     userId: session.user.id,
     input: parsed.data,
+    shareSourceAttribution,
   });
   if ("error" in result) {
     return jsonError(result.error, result.status);
@@ -70,6 +81,10 @@ export async function POST(request: Request) {
       has_source_url: Boolean(parsed.data.source_url),
       has_restaurant_name: Boolean(parsed.data.restaurant_name),
       source_share_token: sourceShareToken,
+      source_sharer_user_id:
+        shareSourceAttribution?.source_sharer_user_id ?? null,
+      source_restaurant_id:
+        shareSourceAttribution?.source_restaurant_id ?? null,
     },
   });
 
@@ -131,7 +146,11 @@ export async function PATCH(request: Request) {
     parsed.data.status === "visited" && parsed.data.linked_visit_id
       ? "to_eat_item_converted"
       : "to_eat_item_updated";
-  const updatedItem = result.item as { source_share_token?: string | null };
+  const updatedItem = result.item as {
+    source_share_token?: string | null;
+    source_sharer_user_id?: string | null;
+    source_restaurant_id?: string | null;
+  };
 
   await recordAnalyticsEvent({
     supabase: session.supabase,
@@ -143,6 +162,8 @@ export async function PATCH(request: Request) {
       linked_visit_id: parsed.data.linked_visit_id ?? null,
       linked_restaurant_id: parsed.data.linked_restaurant_id ?? null,
       source_share_token: updatedItem.source_share_token ?? null,
+      source_sharer_user_id: updatedItem.source_sharer_user_id ?? null,
+      source_restaurant_id: updatedItem.source_restaurant_id ?? null,
     },
   });
 
@@ -157,6 +178,8 @@ export async function PATCH(request: Request) {
         item_id: parsed.data.id,
         linked_visit_id: parsed.data.linked_visit_id ?? null,
         linked_restaurant_id: parsed.data.linked_restaurant_id ?? null,
+        source_sharer_user_id: updatedItem.source_sharer_user_id ?? null,
+        source_restaurant_id: updatedItem.source_restaurant_id ?? null,
       },
     });
   }

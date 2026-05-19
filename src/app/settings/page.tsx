@@ -3,11 +3,15 @@ import { ConfigNotice } from "@/components/layout/ConfigNotice";
 import { I18nText } from "@/components/i18n/I18nText";
 import { SettingsClient } from "@/components/settings/SettingsClient";
 import { getSessionContext } from "@/lib/data";
+import { getAnalyticsAdminClientForEmail } from "@/server/services/analyticsMetrics";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const { configured, user } = await getSessionContext({ protect: true });
+  const canViewMetrics = Boolean(
+    await getAnalyticsAdminClientForEmail(user?.email ?? null),
+  );
 
   return (
     <main className="min-h-screen bg-stone-50 pb-24 sm:pb-0">
@@ -30,7 +34,7 @@ export default async function SettingsPage() {
           <div className="rounded-lg bg-stone-50 p-4 text-sm leading-6 text-stone-700">
             <I18nText k="settings.securityNote" />
           </div>
-          <SettingsClient />
+          <SettingsClient canViewMetrics={canViewMetrics} />
         </section>
       </div>
     </main>

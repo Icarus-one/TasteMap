@@ -252,6 +252,8 @@ export type ToEatItem = {
   linked_restaurant_id: string | null;
   linked_visit_id: string | null;
   source_share_token: string | null;
+  source_sharer_user_id: string | null;
+  source_restaurant_id: string | null;
   created_at: string;
   updated_at: string;
 };

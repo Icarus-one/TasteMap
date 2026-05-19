@@ -6,7 +6,11 @@ import { BarChart3, Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 
-export function SettingsClient() {
+export function SettingsClient({
+  canViewMetrics = false,
+}: {
+  canViewMetrics?: boolean;
+}) {
   const router = useRouter();
   const { t } = useI18n();
   const [message, setMessage] = useState<string | null>(null);
@@ -67,13 +71,15 @@ export function SettingsClient() {
         <Download aria-hidden="true" className="size-4" />
         {t("settings.exportJson")}
       </button>
-      <Link
-        href="/metrics"
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-      >
-        <BarChart3 aria-hidden="true" className="size-4" />
-        {t("settings.metrics")}
-      </Link>
+      {canViewMetrics ? (
+        <Link
+          href="/metrics"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+        >
+          <BarChart3 aria-hidden="true" className="size-4" />
+          {t("settings.metrics")}
+        </Link>
+      ) : null}
       <button
         type="button"
         disabled={isWorking}
