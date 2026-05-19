@@ -913,6 +913,8 @@ function buildOptimisticItem({
     linked_restaurant_id: null,
     linked_visit_id: null,
     source_share_token: null,
+    source_sharer_user_id: null,
+    source_restaurant_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   } satisfies ToEatItem;

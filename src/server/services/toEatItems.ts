@@ -7,21 +7,31 @@ import {
 
 export type CreateToEatItemInput = z.infer<typeof createToEatItemSchema>;
 export type UpdateToEatItemInput = z.infer<typeof updateToEatItemSchema>;
+type ShareSourceAttribution = {
+  source_sharer_user_id: string;
+  source_restaurant_id: string;
+};
 
 export async function createToEatItem({
   supabase,
   userId,
   input,
+  shareSourceAttribution = null,
 }: {
   supabase: SupabaseClient;
   userId: string;
   input: CreateToEatItemInput;
+  shareSourceAttribution?: ShareSourceAttribution | null;
 }) {
   const { data, error } = await supabase
     .from("to_eat_items")
     .insert({
       user_id: userId,
       ...input,
+      source_sharer_user_id:
+        shareSourceAttribution?.source_sharer_user_id ?? null,
+      source_restaurant_id:
+        shareSourceAttribution?.source_restaurant_id ?? null,
     })
     .select("*")
     .single();

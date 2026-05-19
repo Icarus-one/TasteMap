@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthRecoveryRedirect } from "@/components/auth/AuthRecoveryRedirect";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { PwaServiceWorker } from "@/components/layout/PwaServiceWorker";
 import "./globals.css";
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
+        <AuthRecoveryRedirect />
         <AnalyticsTracker />
         <PwaServiceWorker />
       </body>
